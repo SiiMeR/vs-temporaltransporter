@@ -1,0 +1,13 @@
+{
+  "type": "code",
+  "modid": "temporaltransporter",
+  "name": "TemporalTransporter",
+  "authors": [
+    "SiiMeR"
+  ],
+  "description": "Adds temporal transporters to the game, allowing players to send messages between them, for a cost.",
+  "version": "1.0.0",
+  "dependencies": {
+    "game": ""
+  }
+}
