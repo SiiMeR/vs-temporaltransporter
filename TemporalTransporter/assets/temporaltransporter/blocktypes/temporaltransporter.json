@@ -1,12 +1,12 @@
 {
   code: "temporaltransporter",
   class: "Block",
+  entityClass: "TemporalTransporter",
   behaviors: [
     {
       name: "HorizontalOrientable"
     }
   ],
-  entity: "TemporalTransporter",
   variantgroups: [
     {
       code: "state",
