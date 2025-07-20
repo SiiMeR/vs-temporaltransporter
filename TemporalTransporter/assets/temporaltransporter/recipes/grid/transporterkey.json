@@ -1,0 +1,17 @@
+{
+  ingredientPattern: "P",
+  ingredients: {
+    "P": {
+      type: "item",
+      code: "game:stone-granite"
+    }
+  },
+  width: 1,
+  height: 1,
+  shapeless: true,
+  output: {
+    type: "item",
+    code: "transporterkey",
+    quantity: 2
+  }
+}

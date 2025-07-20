@@ -44,9 +44,11 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
         var dialogBounds = ElementStdBounds.AutosizedMainDialog;
 
         var inputSlotBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, 0, 30, 1, 1);
+        var keySlotBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None,
+            150, 30, 1, 1);
 
         var sendButtonBounds =
-            ElementBounds.Fixed(100, 30, 100, GuiElementPassiveItemSlot.unscaledSlotSize); //  (0, 70, 100, 20);
+            ElementBounds.Fixed(60, 30, 80, GuiElementPassiveItemSlot.unscaledSlotSize);
 
         var top = inputSlotBounds.fixedHeight + inputSlotBounds.fixedY + 70;
 
@@ -63,13 +65,14 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
             .AddDialogTitleBar(DialogTitle, OnTitleBarClose)
             .BeginChildElements(bgBounds)
             .AddItemSlotGrid(Inventory, SendInvPacket, 1, new[] { 0 }, inputSlotBounds, "inputslot")
-            .AddButton("Send", OnSendClick, sendButtonBounds, CairoFont.ButtonText(), EnumButtonStyle.Normal,
+            .AddItemSlotGrid(Inventory, SendInvPacket, 1, new[] { 1 }, keySlotBounds, "keyslot")
+            .AddButton("Send", OnSendClick, sendButtonBounds, CairoFont.SmallButtonText(), EnumButtonStyle.Normal,
                 "sendButton")
             .AddStaticText("Received Mail", CairoFont.WhiteSmallText(), ElementBounds.Fixed(0, 125, 200, 20),
                 "receivedMailTitle")
-            .AddItemSlotGrid(Inventory, SendInvPacket, 4, new[] { 1, 2, 3, 4 }, receivedMailBounds,
+            .AddItemSlotGrid(Inventory, SendInvPacket, 4, new[] { 2, 3, 4, 5 }, receivedMailBounds,
                 "receivedMailBounds")
-            .AddItemSlotGrid(Inventory, SendInvPacket, 4, new[] { 5, 6, 7, 8 }, receivedMailBounds2,
+            .AddItemSlotGrid(Inventory, SendInvPacket, 4, new[] { 6, 7, 8, 9 }, receivedMailBounds2,
                 "receivedMailBounds2")
             .EndChildElements()
             .Compose();

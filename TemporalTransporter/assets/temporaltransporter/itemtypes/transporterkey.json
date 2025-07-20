@@ -1,0 +1,69 @@
+{
+  "code": "transporterkey",
+  "class": "ItemTransporterKey",
+  "maxstacksize": 2,
+  "creativeinventory": {
+    "general": [
+      "*"
+    ],
+    "temporaltransporter": [
+      "*"
+    ]
+  },
+  "shape": {
+    "base": "game:item/gear-temporal"
+  },
+  "attributes": {
+    displaycaseable: true,
+    shelvable: true,
+    groundStorageTransform: {
+      translation: {
+        x: 0,
+        y: -0.46,
+        z: 0
+      },
+      rotation: {
+        x: -43,
+        y: 90,
+        z: -58
+      },
+      scale: 0.25
+    }
+  },
+  tpHandTransform: {
+    translation: {
+      x: -0.95,
+      y: -0.11,
+      z: -0.85
+    },
+    rotation: {
+      x: 0,
+      y: -89,
+      z: 5
+    },
+    origin: {
+      x: 0.5,
+      y: 0.0625,
+      z: 0.5
+    },
+    scale: 0.61
+  },
+  guiTransform: {
+    translation: {
+      x: 3,
+      y: 1,
+      z: 0
+    },
+    rotation: {
+      x: 145,
+      y: -12,
+      z: 0
+    },
+    origin: {
+      x: 0.5,
+      y: 0.0625,
+      z: 0.5
+    },
+    scale: 2.5
+  }
+}
