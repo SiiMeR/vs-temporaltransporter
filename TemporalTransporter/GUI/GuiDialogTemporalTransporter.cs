@@ -7,7 +7,7 @@ namespace TemporalTransporter.GUI;
 
 public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
 {
-    private BlockEntityTemporalTransporter _blockEntity;
+    private readonly BlockEntityTemporalTransporter _blockEntity;
 
     public GuiDialogTemporalTransporter(InventoryBase inventory, BlockPos bePos, ICoreClientAPI capi,
         BlockEntityTemporalTransporter blockEntity) :
@@ -80,9 +80,24 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
         return true;
     }
 
+
     private bool OnSendClick()
     {
-        Console.WriteLine("Send clicked");
+        var packet = new Packet_Client
+        {
+            BlockEntityPacket = new Packet_BlockEntityPacket
+            {
+                X = BlockEntityPosition.X,
+                Y = BlockEntityPosition.Y,
+                Z = BlockEntityPosition.Z,
+                Packetid = 1337,
+                Data = Array.Empty<byte>() 
+            },
+            Id = 1337
+        };
+
+        capi.Network.SendBlockEntityPacket(BlockEntityPosition.X, BlockEntityPosition.Y,
+            BlockEntityPosition.Z, packet);
 
         return true;
     }

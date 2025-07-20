@@ -19,5 +19,6 @@ public class TemporalTransporterModSystem : ModSystem
     {
         ServerApi = api;
         DatabaseAccessor.Transporter = new TransporterDatabase(api, Mod.Info.ModID);
+        DatabaseAccessor.InventoryItem = new InventoryItemDatabase(api, Mod.Info.ModID);
     }
 }
