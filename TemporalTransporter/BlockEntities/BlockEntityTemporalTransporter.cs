@@ -21,7 +21,15 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
     public BlockEntityTemporalTransporter()
     {
-        _inventory = new InventoryGeneric(10, null, null);
+        _inventory = new InventoryGeneric(10, null, null, (id, self) =>
+        {
+            if (id == 1)
+            {
+                return new ItemSlotLimited(self, new[] { "temporaltransporter:transporterkey" });
+            }
+
+            return new ItemSlotSurvival(self);
+        });
     }
 
 
@@ -49,7 +57,13 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
         var itemStack = _inventory[slotId].Itemstack;
 
-        if (itemStack.Collectible is not ItemTransporterKey transporterKey)
+        if (itemStack == null)
+        {
+            DatabaseAccessor.Transporter.SetTransporterConnectionKey(_transporterId, string.Empty);
+            return;
+        }
+
+        if (itemStack.Collectible is not ItemTransporterKey)
         {
             return;
         }
@@ -60,7 +74,6 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
             return;
         }
 
-        // TODO check if slot is emptied or added to
 
         DatabaseAccessor.Transporter.SetTransporterConnectionKey(_transporterId, code);
     }
@@ -70,14 +83,12 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
     {
         if (Api.Side == EnumAppSide.Server)
         {
-            var id = DatabaseAccessor.Transporter.InsertTransporter(new Transporter
+            _transporterId = DatabaseAccessor.Transporter.InsertTransporter(new Transporter
             {
                 X = Pos.X,
                 Y = Pos.Y,
                 Z = Pos.Z
             });
-
-            _transporterId = id;
         }
 
 

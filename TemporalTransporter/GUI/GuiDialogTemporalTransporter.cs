@@ -15,7 +15,7 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
     {
         _blockEntity = blockEntity;
 
-        SetupDebugHandlers();
+        // SetupDebugHandlers();
     }
 
     public override string ToggleKeyCombinationCode => null!;
