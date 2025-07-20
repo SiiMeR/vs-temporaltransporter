@@ -1,14 +1,15 @@
 ﻿using TemporalTransporter.GUI;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Datastructures;
 using Vintagestory.GameContent;
 
 namespace TemporalTransporter;
 
 public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 {
-    private InventoryGeneric _inventory;
-    private GuiDialogTemporalTransporter? _openDialog;
+    private readonly InventoryGeneric _inventory;
+    private GuiDialogTemporalTransporter? _dialog;
 
     public BlockEntityTemporalTransporter(InventoryGeneric inventory)
     {
@@ -17,11 +18,18 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
     public BlockEntityTemporalTransporter()
     {
+        _inventory = new InventoryGeneric(9, null, null);
     }
 
 
     public override InventoryBase Inventory => _inventory;
     public override string InventoryClassName { get; } = "temporaltransporterInv";
+
+    public override void Initialize(ICoreAPI api)
+    {
+        _inventory.LateInitialize($"{InventoryClassName}-{Pos}", api);
+        base.Initialize(api);
+    }
 
     public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
     {
@@ -29,19 +37,33 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
         if (api.Side != EnumAppSide.Client || api is not ICoreClientAPI capi)
         {
-            return false;
+            return true;
         }
 
-        _openDialog ??= new GuiDialogTemporalTransporter(Inventory, blockSel.Position, capi);
+        toggleInventoryDialogClient(byPlayer, () =>
+        {
+            _dialog ??= new GuiDialogTemporalTransporter(Inventory, Pos, capi, this);
+            // _dialog?.Update();
 
-        _openDialog?.TryOpen();
+            return _dialog;
+        });
+
 
         return true;
     }
 
-    public override void Initialize(ICoreAPI api)
+    public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldForResolving)
     {
-        _inventory = new InventoryGeneric(1, $"{InventoryClassName}-{Pos}", api);
-        base.Initialize(api);
+        Inventory.FromTreeAttributes(tree.GetTreeAttribute("inventory"));
+
+        base.FromTreeAttributes(tree, worldForResolving);
+    }
+
+    public override void ToTreeAttributes(ITreeAttribute tree)
+    {
+        base.ToTreeAttributes(tree);
+        ITreeAttribute invtree = new TreeAttribute();
+        Inventory.ToTreeAttributes(invtree);
+        tree["inventory"] = invtree;
     }
 }
