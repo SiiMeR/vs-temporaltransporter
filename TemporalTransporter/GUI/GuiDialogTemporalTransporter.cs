@@ -1,4 +1,5 @@
 ﻿using System;
+using TemporalTransporter.Entities;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
@@ -9,16 +10,24 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
 {
     private readonly BlockEntityTemporalTransporter _blockEntity;
 
+    private bool _isDisabled;
+
     public GuiDialogTemporalTransporter(InventoryBase inventory, BlockPos bePos, ICoreClientAPI capi,
         BlockEntityTemporalTransporter blockEntity) :
         base("Temporal Transporter", inventory, bePos, capi)
     {
         _blockEntity = blockEntity;
+        Inventory.SlotModified += OnItemSlotModified;
 
         // SetupDebugHandlers();
     }
 
     public override string ToggleKeyCombinationCode => null!;
+
+    ~GuiDialogTemporalTransporter()
+    {
+        Inventory.SlotModified -= OnItemSlotModified;
+    }
 
     public void SetupDebugHandlers()
     {
@@ -35,8 +44,6 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
     private bool SetupDialog()
     {
         var windowBounds = ElementBounds.Fixed(0, 0, 200, 250);
-
-
         var bgBounds = ElementBounds.Fill.WithFixedPadding(GuiStyle.ElementToDialogPadding);
         bgBounds.BothSizing = ElementSizing.FitToChildren;
         bgBounds.WithChildren(windowBounds);
@@ -68,6 +75,11 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
             .AddItemSlotGrid(Inventory, SendInvPacket, 1, new[] { 1 }, keySlotBounds, "keyslot")
             .AddButton("Send", OnSendClick, sendButtonBounds, CairoFont.SmallButtonText(), EnumButtonStyle.Normal,
                 "sendButton")
+            .AddIf(_isDisabled)
+            .AddStaticText("Disabled: Not visible from sky",
+                CairoFont.WhiteSmallText().WithFontSize(14).WithColor(new[] { 1d, 0d, 0d, 1d }),
+                ElementBounds.Fixed(0, 100, 210, 20))
+            .EndIf()
             .AddStaticText("Received Mail", CairoFont.WhiteSmallText(), ElementBounds.Fixed(0, 125, 200, 20),
                 "receivedMailTitle")
             .AddItemSlotGrid(Inventory, SendInvPacket, 4, new[] { 2, 3, 4, 5 }, receivedMailBounds,
@@ -77,7 +89,25 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
             .EndChildElements()
             .Compose();
 
+
         return true;
+    }
+
+    private void OnItemSlotModified(int slotId)
+    {
+        if (!SingleComposer.Composed)
+        {
+            return;
+        }
+
+        if (slotId != 0)
+        {
+            return;
+        }
+
+        var itemStack = Inventory[slotId].Itemstack;
+
+        SingleComposer.GetButton("sendButton").Enabled = itemStack != null;
     }
 
 
@@ -91,7 +121,7 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
                 Y = BlockEntityPosition.Y,
                 Z = BlockEntityPosition.Z,
                 Packetid = 1337,
-                Data = Array.Empty<byte>() 
+                Data = Array.Empty<byte>()
             },
             Id = 1337
         };
@@ -116,8 +146,15 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
 
     public override void OnGuiOpened()
     {
-        base.OnGuiOpened();
+        Console.WriteLine("open");
 
         SetupDialog();
+
+        base.OnGuiOpened();
+    }
+
+    public void SetState(bool isDisabled)
+    {
+        _isDisabled = isDisabled;
     }
 }

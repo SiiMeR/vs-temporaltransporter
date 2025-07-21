@@ -3,18 +3,22 @@ using System.IO;
 using System.Linq;
 using TemporalTransporter.Database;
 using TemporalTransporter.GUI;
+using TemporalTransporter.Helpers;
 using TemporalTransporter.Items;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
+using Vintagestory.API.Server;
 using Vintagestory.GameContent;
 
-namespace TemporalTransporter;
+namespace TemporalTransporter.Entities;
 
 public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 {
     private readonly InventoryGeneric _inventory;
     private GuiDialogTemporalTransporter? _dialog;
+
+    public bool IsDisabled;
 
     public BlockEntityTemporalTransporter(InventoryGeneric inventory)
     {
@@ -35,6 +39,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
                 return new ItemSlotLimited(self, new[] { "temporaltransporter:transporterkey" });
             }
 
+            // received mail slots are take only
             return new ItemSlotLimited(self, Array.Empty<string>());
         });
     }
@@ -115,27 +120,32 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
     {
         if (packetid == 1337)
         {
-            OnSendItem();
+            OnSendItem(player);
+            return;
         }
 
         base.OnReceivedClientPacket(player, packetid, data);
     }
 
-    public void OnSendItem()
+    public void OnSendItem(IPlayer byPlayer)
     {
+        if (IsDisabled)
+        {
+            return;
+        }
+
         if (Api.Side != EnumAppSide.Server || _inventory[0].Itemstack == null)
+        {
+            return;
+        }
+
+        if (byPlayer is not IServerPlayer player)
         {
             return;
         }
 
         var connectionKey = _inventory[1].Itemstack?.Attributes?.GetString("keycode");
         if (string.IsNullOrWhiteSpace(connectionKey))
-        {
-            return;
-        }
-
-        var itemStack = _inventory[0].TakeOut(1);
-        if (itemStack is not { StackSize: > 0 })
         {
             return;
         }
@@ -151,19 +161,30 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
             return;
         }
 
-        MoveItemToPosition(itemStack, toPosition);
+        var suitableSlot = DatabaseAccessor.InventoryItem.GetFirstFreeSlotId(toPosition);
+        if (suitableSlot == -1)
+        {
+            player.SendIngameError("ttrans-full",
+                Util.LangStr("error-temporaltransporter-destinationfull"));
+            return;
+        }
 
+
+        Api.World
+            .PlaySoundAt(new AssetLocation("game:sounds/effect/translocate-breakdimension"),
+                Pos.X, Pos.Y, Pos.Z,
+                null, true, 16f);
+        var itemStack = _inventory[0].TakeOut(1);
+        MoveItemToPosition(itemStack, toPosition, suitableSlot);
         _inventory.MarkSlotDirty(0);
     }
 
-    public void MoveItemToPosition(ItemStack itemStack, string toCoordinateKey)
+    public void MoveItemToPosition(ItemStack itemStack, string toCoordinateKey, int slotId)
     {
         try
         {
             var itemBytes = ItemstackToBytes(itemStack);
-
-
-            DatabaseAccessor.InventoryItem.UpdateInventoryItemSlot(toCoordinateKey, 0, itemBytes);
+            DatabaseAccessor.InventoryItem.UpdateInventoryItemSlot(toCoordinateKey, slotId, itemBytes);
         }
         catch (Exception e)
         {
@@ -260,6 +281,8 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldForResolving)
     {
         Inventory.FromTreeAttributes(tree.GetTreeAttribute("inventory"));
+        IsDisabled = tree.GetBool("disabled");
+
         base.FromTreeAttributes(tree, worldForResolving);
     }
 
@@ -269,5 +292,18 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         ITreeAttribute invtree = new TreeAttribute();
         Inventory.ToTreeAttributes(invtree);
         tree["inventory"] = invtree;
+        tree.SetBool("disabled", IsDisabled);
+    }
+
+    public void Disable()
+    {
+        IsDisabled = true;
+        _dialog?.SetState(IsDisabled);
+    }
+
+    public void Enable()
+    {
+        IsDisabled = false;
+        _dialog?.SetState(IsDisabled);
     }
 }

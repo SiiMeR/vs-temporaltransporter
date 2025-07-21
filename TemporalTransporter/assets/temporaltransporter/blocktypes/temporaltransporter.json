@@ -10,6 +10,14 @@
       name: "Container"
     }
   ],
+  entityBehaviors: [
+    {
+      name: "Uncoverable"
+    },
+    {
+      name: "Skybeam"
+    }
+  ],
   variantgroups: [
     {
       code: "state",

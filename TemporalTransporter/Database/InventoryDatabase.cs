@@ -21,7 +21,8 @@ public class InventoryItemDatabase
         "CREATE TABLE IF NOT EXISTS InventoryItems (CoordinateKey TEXT, SlotId INTEGER, ItemBlob BLOB, PRIMARY KEY (CoordinateKey, SlotId))";
 
     private const string InsertInventoryItemQuery =
-        "INSERT INTO InventoryItems (CoordinateKey, SlotId, ItemBlob) VALUES (@CoordinateKey, @SlotId, @ItemBlob);";
+        "INSERT INTO InventoryItems (CoordinateKey, SlotId, ItemBlob) VALUES (@CoordinateKey, @SlotId, @ItemBlob) " +
+        "ON CONFLICT(CoordinateKey, SlotId) DO UPDATE SET ItemBlob = excluded.ItemBlob;";
 
     private const string UpdateInventoryItemSlotQuery =
         "UPDATE InventoryItems SET ItemBlob = @ItemBlob WHERE CoordinateKey = @CoordinateKey AND SlotId = @SlotId;";
@@ -98,22 +99,14 @@ public class InventoryItemDatabase
         command.Parameters.AddWithValue("@CoordinateKey", coordinateKey);
 
         using var reader = command.ExecuteReader();
-        var occupiedSlots = new bool[8];
-
         while (reader.Read())
         {
             var slotId = reader.GetInt32(1);
-            if (slotId >= 0 && slotId < occupiedSlots.Length)
-            {
-                occupiedSlots[slotId] = true;
-            }
-        }
+            var itemBlob = reader.IsDBNull(2) ? null : reader.GetString(2);
 
-        for (var i = 0; i < occupiedSlots.Length; i++)
-        {
-            if (!occupiedSlots[i])
+            if (string.IsNullOrWhiteSpace(itemBlob))
             {
-                return i;
+                return slotId;
             }
         }
 

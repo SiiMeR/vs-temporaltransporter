@@ -19,7 +19,8 @@ public class TransporterDatabase
         "CREATE TABLE IF NOT EXISTS Transporters (CoordinateKey TEXT PRIMARY KEY, ConnectionKey TEXT);";
 
     private const string InsertTransporterQuery =
-        "INSERT INTO Transporters (CoordinateKey) VALUES (@CoordinateKey);";
+        "INSERT INTO Transporters (CoordinateKey) VALUES (@CoordinateKey)" +
+        "ON CONFLICT(CoordinateKey) DO UPDATE SET ConnectionKey = excluded.ConnectionKey;";
 
     private const string GetTransporterQuery =
         "SELECT * FROM Transporters WHERE CoordinateKey = @CoordinateKey;";
