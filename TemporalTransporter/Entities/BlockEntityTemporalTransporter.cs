@@ -5,6 +5,7 @@ using TemporalTransporter.Database;
 using TemporalTransporter.GUI;
 using TemporalTransporter.Helpers;
 using TemporalTransporter.Items;
+using TemporalTransporter.Messages;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
@@ -17,7 +18,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 {
     private readonly InventoryGeneric _inventory;
     private GuiDialogTemporalTransporter? _dialog;
-
+    public bool IsConnected;
     public bool IsDisabled;
 
     public BlockEntityTemporalTransporter(InventoryGeneric inventory)
@@ -36,11 +37,11 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
             if (id == 1)
             {
-                return new ItemSlotLimited(self, new[] { "temporaltransporter:transporterkey" });
+                return new ItemSlotLimited(self, new[] { "temporaltransporter:transporterkey" }, true);
             }
 
             // received mail slots are take only
-            return new ItemSlotLimited(self, Array.Empty<string>());
+            return new ItemSlotLimited(self, Array.Empty<string>(), true);
         });
     }
 
@@ -95,7 +96,34 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
 
             DatabaseAccessor.Transporter.SetTransporterConnectionKey(Pos.ToVec3i(), code);
+
+            var transportersWithKey =
+                DatabaseAccessor.Transporter.GetTransportersByConnectionKey(code);
+
+            if (transportersWithKey.Length > 1)
+            {
+                Console.WriteLine("has 2");
+                LockKeySlot(transportersWithKey);
+            }
         }
+    }
+
+    private void LockKeySlot(Transporter[] transportersWithKey)
+    {
+        var ids = transportersWithKey.Select(t => t.CoordinateKey).ToArray();
+
+        if (TemporalTransporterModSystem.ServerNetworkChannel == null)
+        {
+            throw new InvalidOperationException("ServerNetworkChannel is not initialized.");
+        }
+
+        var players = Api.World.AllOnlinePlayers.Where(p => Inventory.openedByPlayerGUIds.Contains(p.PlayerUID))
+            .ToArray();
+
+        TemporalTransporterModSystem.ServerNetworkChannel.BroadcastPacket(new TransportersConnectedPacket
+        {
+            TransporterIds = ids
+        }, players as IServerPlayer[]);
     }
 
 
@@ -115,7 +143,6 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         base.OnBlockPlaced(byItemStack);
     }
 
-
     public override void OnReceivedClientPacket(IPlayer player, int packetid, byte[] data)
     {
         if (packetid == 1337)
@@ -125,6 +152,12 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         }
 
         base.OnReceivedClientPacket(player, packetid, data);
+    }
+
+    public void SetIsConnected(bool isConnected)
+    {
+        IsConnected = isConnected;
+        _dialog?.SetIsConnected(isConnected);
     }
 
     public void OnSendItem(IPlayer byPlayer)
@@ -230,9 +263,19 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
             }
         }
 
+        Inventory[1].TakeOut(1);
+        Inventory.MarkSlotDirty(1);
+
         base.OnBlockRemoved();
     }
 
+    public override void OnBlockBroken(IPlayer byPlayer = null)
+    {
+        // Inventory[1].TakeOut(1);
+        // Inventory.MarkSlotDirty(1);
+
+        base.OnBlockBroken(byPlayer);
+    }
 
     public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
     {
@@ -275,6 +318,9 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
             return _dialog;
         });
 
+        _dialog?.SetIsConnected(IsConnected);
+        _dialog?.SetIsDisabled(IsDisabled);
+
         return true;
     }
 
@@ -282,6 +328,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
     {
         Inventory.FromTreeAttributes(tree.GetTreeAttribute("inventory"));
         IsDisabled = tree.GetBool("disabled");
+        IsConnected = tree.GetBool("connected");
 
         base.FromTreeAttributes(tree, worldForResolving);
     }
@@ -293,17 +340,18 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         Inventory.ToTreeAttributes(invtree);
         tree["inventory"] = invtree;
         tree.SetBool("disabled", IsDisabled);
+        tree.SetBool("connected", IsConnected);
     }
 
     public void Disable()
     {
         IsDisabled = true;
-        _dialog?.SetState(IsDisabled);
+        _dialog?.SetIsDisabled(IsDisabled);
     }
 
     public void Enable()
     {
         IsDisabled = false;
-        _dialog?.SetState(IsDisabled);
+        _dialog?.SetIsDisabled(IsDisabled);
     }
 }

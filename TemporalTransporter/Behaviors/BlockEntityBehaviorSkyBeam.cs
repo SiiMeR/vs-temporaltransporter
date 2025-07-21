@@ -31,11 +31,14 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
     {
         if (TemporalTransporterModSystem.ClientApi is { Side: EnumAppSide.Client })
         {
-            TemporalTransporterModSystem.ClientApi.Event.UnregisterGameTickListener(_listenerId);
+            TemporalTransporterModSystem.ClientApi.Event.EnqueueMainThreadTask(
+                () => { TemporalTransporterModSystem.ClientApi.Event.UnregisterGameTickListener(_listenerId); },
+                "UnregisterSkyBeamListener");
         }
 
         base.OnBlockRemoved();
     }
+
 
     public override void OnBlockUnloaded()
     {
@@ -76,7 +79,7 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
                 ColorUtil.ColorFromRgba(200, 155, 0, 220),
                 new Vec3d(), new Vec3d(),
                 new Vec3f(0, 0.5f, 0), new Vec3f(0, 1f, 0),
-                1f, 0f, 0.05f, 0.15f,
+                1f, 0f, 0.08f, 0.18f,
                 EnumParticleModel.Quad
             )
             { SelfPropelled = true, VertexFlags = 255 };
@@ -91,9 +94,9 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
 
 
         var multiplier = 0.8f;
-        
+
         var minPosX = Random.Shared.NextDouble() * multiplier * 2 - multiplier;
-        var minPosZ = Random.Shared.NextDouble()* multiplier * 2 - multiplier;
+        var minPosZ = Random.Shared.NextDouble() * multiplier * 2 - multiplier;
 
         beam.MinPos.Set(Pos.X + 0.5, Pos.Y + 1.1, Pos.Z + 0.5);
         beam.AddPos.Set(minPosX, 3, minPosZ);

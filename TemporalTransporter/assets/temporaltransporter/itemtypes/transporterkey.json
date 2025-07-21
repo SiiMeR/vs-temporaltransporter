@@ -14,6 +14,7 @@
     "base": "game:item/gear-temporal"
   },
   "attributes": {
+    keycode: "TEST",
     displaycaseable: true,
     shelvable: true,
     groundStorageTransform: {

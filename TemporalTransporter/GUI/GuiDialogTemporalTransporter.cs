@@ -9,6 +9,7 @@ namespace TemporalTransporter.GUI;
 public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
 {
     private readonly BlockEntityTemporalTransporter _blockEntity;
+    private bool _isConnected;
 
     private bool _isDisabled;
 
@@ -72,7 +73,12 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
             .AddDialogTitleBar(DialogTitle, OnTitleBarClose)
             .BeginChildElements(bgBounds)
             .AddItemSlotGrid(Inventory, SendInvPacket, 1, new[] { 0 }, inputSlotBounds, "inputslot")
+            .AddIf(_isConnected)
+            .AddPassiveItemSlot(keySlotBounds, Inventory, Inventory[1])
+            .EndIf()
+            .AddIf(!_isConnected)
             .AddItemSlotGrid(Inventory, SendInvPacket, 1, new[] { 1 }, keySlotBounds, "keyslot")
+            .EndIf()
             .AddButton("Send", OnSendClick, sendButtonBounds, CairoFont.SmallButtonText(), EnumButtonStyle.Normal,
                 "sendButton")
             .AddIf(_isDisabled)
@@ -146,15 +152,19 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
 
     public override void OnGuiOpened()
     {
-        Console.WriteLine("open");
-
         SetupDialog();
 
         base.OnGuiOpened();
     }
 
-    public void SetState(bool isDisabled)
+    public void SetIsDisabled(bool isDisabled)
     {
         _isDisabled = isDisabled;
+    }
+
+    public void SetIsConnected(bool isConnected)
+    {
+        _isConnected = isConnected;
+        SetupDialog();
     }
 }
