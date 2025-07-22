@@ -46,14 +46,14 @@ public class TemporalTransporterModSystem : ModSystem
             throw new InvalidOperationException("ClientApi is not initialized.");
         }
 
-        foreach (var transporterId in packet.TransporterIds)
-        {
-            var coords = transporterId.Split(':').Select(t => Convert.ToInt32(t)).ToArray();
-            var blockPos = new BlockPos(coords[0], coords[1], coords[2]);
-            var blockEntity = ClientApi.World.BlockAccessor.GetBlockEntity<BlockEntityTemporalTransporter>(blockPos);
-
-            blockEntity.SetIsConnected(true);
-        }
+        // foreach (var transporterId in packet.TransporterIds)
+        // {
+        //     var coords = transporterId.Split(':').Select(t => Convert.ToInt32(t)).ToArray();
+        //     var blockPos = new BlockPos(coords[0], coords[1], coords[2]);
+        //     var blockEntity = ClientApi.World.BlockAccessor.GetBlockEntity<BlockEntityTemporalTransporter>(blockPos);
+        //
+        //     blockEntity.SetIsConnected(true);
+        // }
     }
 
     public override void StartServerSide(ICoreServerAPI api)

@@ -1,5 +1,5 @@
 ﻿using System;
-using TemporalTransporter.Entities;
+using System.Linq;
 using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
@@ -10,8 +10,9 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
 {
     private float _accum;
 
-    private long _listenerId;
+    private int _colorRgba = ColorUtil.ColorFromRgba(0, 0, 0, 255);
 
+    private long _listenerId;
 
     public BlockEntityBehaviorSkyBeam(BlockEntity blockentity) : base(blockentity)
     {
@@ -19,6 +20,9 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
 
     public override void Initialize(ICoreAPI api, JsonObject properties)
     {
+        var colorRgba = properties["beamColorRGBA"].AsString().Split(",").Select(c => Convert.ToInt32(c)).ToArray();
+        _colorRgba = ColorUtil.ColorFromRgba(colorRgba[0], colorRgba[1], colorRgba[2], colorRgba[3]);
+
         if (api is { Side: EnumAppSide.Client })
         {
             _listenerId = api.Event.RegisterGameTickListener(OnGameTick, 50);
@@ -26,6 +30,7 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
 
         base.Initialize(api, properties);
     }
+
 
     public override void OnBlockRemoved()
     {
@@ -60,11 +65,6 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
             return;
         }
 
-        if (Blockentity is not BlockEntityTemporalTransporter temporalTransporter ||
-            temporalTransporter.IsDisabled)
-        {
-            return;
-        }
 
         var api = TemporalTransporterModSystem.ClientApi;
 
@@ -73,9 +73,10 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
             return;
         }
 
+
         var beam = new SimpleParticleProperties(
                 2, 5,
-                ColorUtil.ColorFromRgba(200, 155, 0, 220),
+                _colorRgba,
                 new Vec3d(), new Vec3d(),
                 new Vec3f(0, 0.5f, 0), new Vec3f(0, 1f, 0),
                 1f, 0f, 0.08f, 0.18f,

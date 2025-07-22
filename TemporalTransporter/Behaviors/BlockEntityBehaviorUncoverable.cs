@@ -16,24 +16,19 @@ public class BlockEntityBehaviorUncoverable : BlockEntityBehavior
     {
         base.Initialize(api, properties);
 
-        if (api.World.Side == EnumAppSide.Server)
-        {
-            _listernerId = api.Event.RegisterGameTickListener(Every5Seconds, 5000);
-        }
+        _listernerId = api.Event.RegisterGameTickListener(EveryXSeconds, 1000);
     }
 
     public override void OnBlockUnloaded()
     {
         base.OnBlockUnloaded();
 
-        if (Api.World.Side == EnumAppSide.Server)
-        {
-            Api.Event.UnregisterGameTickListener(_listernerId);
-        }
+        Api.Event.UnregisterGameTickListener(_listernerId);
     }
 
-    private void Every5Seconds(float _)
+    private void EveryXSeconds(float _)
     {
+        // TODO: interceptor blocking, message bus messaging
         if (Blockentity is not BlockEntityTemporalTransporter transporter)
         {
             return;

@@ -1,0 +1,7 @@
+* update gui when something is sent
+* temporal interceptor does not allow any communication once full 
+* interceptor should have a marker that says it is on a line
+* intercepted should have a lightning strike when received
+* consider making diameter larger
+* config to change ground height
+* shouldnt be usable below Y = ?

@@ -8,7 +8,7 @@ public class ItemSlotLimited : ItemSlot
     private readonly string[] _allowedItems;
     private bool _canTake;
 
-    public ItemSlotLimited(InventoryBase inv, string[] allowedItems, bool canTake) : base(inv)
+    public ItemSlotLimited(InventoryBase inv, string[] allowedItems, bool canTake = true) : base(inv)
     {
         _allowedItems = allowedItems;
         _canTake = canTake;
@@ -36,8 +36,9 @@ public class ItemSlotLimited : ItemSlot
             return false;
         }
 
-        var code = sourceSlot.Itemstack.Collectible.Code.ToString();
+        var code = sourceSlot.Itemstack.Collectible.Code.Path;
 
-        return _allowedItems.Any(allowed => code == allowed) && base.CanHold(sourceSlot);
+        return _allowedItems.Any(allowed => sourceSlot.Itemstack.Collectible.WildCardMatch(allowed)) &&
+               base.CanHold(sourceSlot);
     }
 }

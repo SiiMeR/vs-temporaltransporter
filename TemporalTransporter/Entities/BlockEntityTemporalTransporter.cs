@@ -34,16 +34,20 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         {
             if (id == 0)
             {
-                return new ItemSlotSurvival(self);
+                return new ItemSlotLimited(self,
+                    new[]
+                    {
+                        "envelope-*", "book-normal-*", "paper-parchment"
+                    });
             }
 
             if (id == 1)
             {
-                return new ItemSlotLimited(self, new[] { "temporaltransporter:transporterkey" }, true);
+                return new ItemSlotLimited(self, new[] { "transporterkey" });
             }
 
             // received mail slots are take only
-            return new ItemSlotLimited(self, Array.Empty<string>(), true);
+            return new ItemSlotLimited(self, Array.Empty<string>());
         });
     }
 
@@ -66,8 +70,6 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         }
 
         var itemStack = _inventory[slotId].Itemstack;
-
-
         if (slotId > 1)
         {
             DatabaseAccessor.InventoryItem
@@ -104,7 +106,6 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
             if (transportersWithKey.Length > 1)
             {
-                Console.WriteLine("has 2");
                 LockKeySlot(transportersWithKey);
             }
         }
@@ -208,7 +209,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         {
             var interceptorPos = DatabaseAccessor.CoordinateKeyToVec3i(interceptor.CoordinateKey);
 
-            if (IsInterceptorCatchingBeam(senderPos, receiverPos, interceptorPos, 2f))
+            if (IsInterceptorCatchingBeam(senderPos, receiverPos, interceptorPos, 10f) && HasFreeSlot(interceptorPos))
             {
                 targetPosition = interceptor.CoordinateKey;
                 break;
@@ -232,6 +233,15 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         var itemStack = _inventory[0].TakeOut(1);
         MoveItemToPosition(itemStack, targetPosition, suitableSlot);
         _inventory.MarkSlotDirty(0);
+
+        var weatherSys = Api.ModLoader.GetModSystem<WeatherSystemServer>();
+        weatherSys.SpawnLightningFlash(DatabaseAccessor.CoordinateKeyToVec3d(targetPosition));
+    }
+
+    private bool HasFreeSlot(Vec3i interceptorPos)
+    {
+        return DatabaseAccessor.InventoryItem.GetFirstFreeSlotId(DatabaseAccessor.GetCoordinateKey(interceptorPos)) !=
+               -1;
     }
 
     public static bool IsInterceptorCatchingBeam(Vec3i senderPos, Vec3i receiverPos, Vec3i interceptorPos, float radius)
@@ -366,7 +376,6 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         });
 
         _dialog?.SetIsConnected(IsConnected);
-        _dialog?.SetIsDisabled(IsDisabled);
 
         return true;
     }
@@ -392,13 +401,23 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
     public void Disable()
     {
+        if (IsDisabled)
+        {
+            return;
+        }
+
         IsDisabled = true;
-        _dialog?.SetIsDisabled(IsDisabled);
+        _dialog?.Redraw();
     }
 
     public void Enable()
     {
+        if (!IsDisabled)
+        {
+            return;
+        }
+
         IsDisabled = false;
-        _dialog?.SetIsDisabled(IsDisabled);
+        _dialog?.Redraw();
     }
 }

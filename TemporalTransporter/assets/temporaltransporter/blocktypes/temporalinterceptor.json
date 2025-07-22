@@ -15,7 +15,10 @@
       name: "Uncoverable"
     },
     {
-      name: "Skybeam"
+      name: "Skybeam",
+      properties: {
+        beamColorRGBA: "90,0,200,220"
+      }
     }
   ],
   variantgroups: [

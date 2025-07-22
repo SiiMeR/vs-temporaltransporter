@@ -82,6 +82,13 @@ public static class DatabaseAccessor
         return GetCoordinateKey(position.X, position.Y, position.Z);
     }
 
+    public static Vec3d CoordinateKeyToVec3d(string coordinateKey)
+    {
+        var vec3i = CoordinateKeyToVec3i(coordinateKey);
+
+        return new Vec3d(vec3i.X, vec3i.Y, vec3i.Z);
+    }
+
     public static Vec3i CoordinateKeyToVec3i(string coordinateKey)
     {
         var coords = coordinateKey.Split(':');

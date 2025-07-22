@@ -11,8 +11,6 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
     private readonly BlockEntityTemporalTransporter _blockEntity;
     private bool _isConnected;
 
-    private bool _isDisabled;
-
     public GuiDialogTemporalTransporter(InventoryBase inventory, BlockPos bePos, ICoreClientAPI capi,
         BlockEntityTemporalTransporter blockEntity) :
         base("Temporal Transporter", inventory, bePos, capi)
@@ -66,7 +64,6 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
 
         var receivedMailBounds2 = ElementStdBounds.SlotGrid(EnumDialogArea.None, 0, top, 4, 1);
 
-
         SingleComposer = capi.Gui
             .CreateCompo("temporaltransportergui", dialogBounds)
             .AddShadedDialogBG(bgBounds)
@@ -81,10 +78,10 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
             .EndIf()
             .AddButton("Send", OnSendClick, sendButtonBounds, CairoFont.SmallButtonText(), EnumButtonStyle.Normal,
                 "sendButton")
-            .AddIf(_isDisabled)
+            .AddIf(_blockEntity.IsDisabled)
             .AddStaticText("Disabled: Not visible from sky",
                 CairoFont.WhiteSmallText().WithFontSize(14).WithColor(new[] { 1d, 0d, 0d, 1d }),
-                ElementBounds.Fixed(0, 100, 210, 20))
+                ElementBounds.Fixed(0, 100, 200, 20))
             .EndIf()
             .AddStaticText("Received Mail", CairoFont.WhiteSmallText(), ElementBounds.Fixed(0, 125, 200, 20),
                 "receivedMailTitle")
@@ -157,14 +154,13 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
         base.OnGuiOpened();
     }
 
-    public void SetIsDisabled(bool isDisabled)
-    {
-        _isDisabled = isDisabled;
-    }
-
     public void SetIsConnected(bool isConnected)
     {
         _isConnected = isConnected;
+    }
+
+    public void Redraw()
+    {
         SetupDialog();
     }
 }

@@ -53,8 +53,8 @@ public class GuiDialogTemporalInterceptor : GuiDialogBlockEntity
             .BeginChildElements(bgBounds)
             .AddIf(_isDisabled)
             .AddStaticText("Disabled: Not visible from sky",
-                CairoFont.WhiteSmallText().WithFontSize(14).WithColor(new[] { 1d, 0d, 0d, 1d }),
-                ElementBounds.Fixed(0, 100, 210, 20))
+                CairoFont.WhiteSmallText().WithFontSize(13).WithColor(new[] { 1d, 0d, 0d, 1d }),
+                ElementBounds.Fixed(0, 100, 180, 20))
             .EndIf()
             .AddStaticText("Received Mail", CairoFont.WhiteSmallText(), ElementBounds.Fixed(0, 20, 200, 20),
                 "receivedMailTitle")
