@@ -1,4 +1,112 @@
 {
   code: "temporalinterceptor",
-  class: "Block"
+  class: "Block",
+  entityClass: "TemporalInterceptor",
+  behaviors: [
+    {
+      name: "HorizontalOrientable"
+    },
+    {
+      name: "Container"
+    }
+  ],
+  entityBehaviors: [
+    {
+      name: "Uncoverable"
+    },
+    {
+      name: "Skybeam"
+    }
+  ],
+  variantgroups: [
+    {
+      code: "state",
+      states: [
+        "normal"
+      ]
+    },
+    {
+      code: "side",
+      loadFromProperties: "game:abstract/horizontalorientation"
+    }
+  ],
+  drawtype: "json",
+  faceCullMode: "NeverCull",
+  blockmaterial: "Metal",
+  replaceable: 1,
+  lightAbsorption: 0,
+  creativeinventory: {
+    "general": [
+      "*"
+    ],
+    "temporaltransporter": [
+      "*"
+    ]
+  },
+  shapeByType: {
+    "*-north": {
+      base: "temporalinterceptor",
+      rotateY: 0
+    },
+    "*-east": {
+      base: "temporalinterceptor",
+      rotateY: 270
+    },
+    "*-south": {
+      base: "temporalinterceptor",
+      rotateY: 180
+    },
+    "*-west": {
+      base: "temporalinterceptor",
+      rotateY: 90
+    }
+  },
+  resistance: 30,
+  sideopaque: {
+    all: false
+  },
+  sideao: {
+    all: false
+  },
+  sidesolid: {
+    all: false
+  },
+  sounds: {
+    "place": "game:block/planks",
+    "walk": "game:walk/wood",
+    "ambient": "game:effect/translocate-idle"
+  },
+  drops: [],
+  heldTpIdleAnimation: "holdbothhandslarge",
+  heldRightReadyAnimation: "heldblockready",
+  heldTpUseAnimation: "twohandplaceblock",
+  tpHandTransform: {
+    translation: {
+      x: -1.23,
+      y: -1.91,
+      z: -0.8
+    },
+    rotation: {
+      x: -2,
+      y: 25,
+      z: -78
+    },
+    scale: 0.4
+  },
+  collisionbox: {
+    x1: 0,
+    y1: 0,
+    z1: 0,
+    x2: 1,
+    y2: 1,
+    z2: 1
+  },
+  selectionBox: {
+    x1: 0,
+    y1: 0,
+    z1: 0,
+    x2: 1,
+    y2: 1.0436,
+    z2: 1
+  }
 }

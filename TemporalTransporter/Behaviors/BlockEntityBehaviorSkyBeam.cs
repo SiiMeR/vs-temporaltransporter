@@ -63,7 +63,6 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
         if (Blockentity is not BlockEntityTemporalTransporter temporalTransporter ||
             temporalTransporter.IsDisabled)
         {
-            Console.WriteLine("disabled");
             return;
         }
 

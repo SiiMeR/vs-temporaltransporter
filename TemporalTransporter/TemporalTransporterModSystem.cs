@@ -24,6 +24,7 @@ public class TemporalTransporterModSystem : ModSystem
     {
         api.RegisterItemClass("ItemTransporterKey", typeof(ItemTransporterKey));
         api.RegisterBlockEntityClass("TemporalTransporter", typeof(BlockEntityTemporalTransporter));
+        api.RegisterBlockEntityClass("TemporalInterceptor", typeof(BlockEntityTemporalInterceptor));
         api.RegisterBlockEntityBehaviorClass("Uncoverable", typeof(BlockEntityBehaviorUncoverable));
         api.RegisterBlockEntityBehaviorClass("Skybeam", typeof(BlockEntityBehaviorSkyBeam));
 
@@ -34,7 +35,6 @@ public class TemporalTransporterModSystem : ModSystem
     public override void StartClientSide(ICoreClientAPI api)
     {
         ClientApi = api;
-
         ClientNetworkChannel = api.Network.GetChannel(Mod.Info.ModID)
             .SetMessageHandler<TransportersConnectedPacket>(OnTransportersConnected);
     }
@@ -60,6 +60,7 @@ public class TemporalTransporterModSystem : ModSystem
     {
         ServerApi = api;
         DatabaseAccessor.Transporter = new TransporterDatabase(api, Mod.Info.ModID);
+        DatabaseAccessor.Interceptor = new InterceptorDatabase(api, Mod.Info.ModID);
         DatabaseAccessor.InventoryItem = new InventoryItemDatabase(api, Mod.Info.ModID);
 
         ServerNetworkChannel = api.Network.GetChannel(Mod.Info.ModID);

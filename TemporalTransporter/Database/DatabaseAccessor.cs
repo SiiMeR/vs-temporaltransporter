@@ -7,6 +7,7 @@ public static class DatabaseAccessor
 {
     // initialized during server start. if this causes issues, it is for a reason.
     private static TransporterDatabase? _transporterDatabase;
+    private static InterceptorDatabase? _interceptorDatabase;
     private static InventoryItemDatabase? _inventoryItemDatabase;
 
     public static TransporterDatabase Transporter
@@ -28,6 +29,27 @@ public static class DatabaseAccessor
         }
         set => _transporterDatabase = value;
     }
+
+    public static InterceptorDatabase Interceptor
+    {
+        get
+        {
+            if (TemporalTransporterModSystem.ServerApi == null)
+            {
+                throw new InvalidOperationException(
+                    "Tried to access Interceptor database from client side or before server initialization.");
+            }
+
+            if (_interceptorDatabase == null)
+            {
+                throw new InvalidOperationException("Interceptor database has not been initialized.");
+            }
+
+            return _interceptorDatabase;
+        }
+        set => _interceptorDatabase = value;
+    }
+
 
     public static InventoryItemDatabase InventoryItem
     {
@@ -58,5 +80,22 @@ public static class DatabaseAccessor
     public static string GetCoordinateKey(Vec3i position)
     {
         return GetCoordinateKey(position.X, position.Y, position.Z);
+    }
+
+    public static Vec3i CoordinateKeyToVec3i(string coordinateKey)
+    {
+        var coords = coordinateKey.Split(':');
+        if (coords.Length != 3)
+        {
+            throw new ArgumentException("Invalid coordinate key format. Expected format: 'x:y:z'.");
+        }
+
+        if (!int.TryParse(coords[0], out var x) || !int.TryParse(coords[1], out var y) ||
+            !int.TryParse(coords[2], out var z))
+        {
+            throw new ArgumentException("Coordinate key contains non-integer values.");
+        }
+
+        return new Vec3i(x, y, z);
     }
 }
