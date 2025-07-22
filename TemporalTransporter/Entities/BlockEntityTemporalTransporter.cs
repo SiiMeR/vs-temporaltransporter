@@ -275,6 +275,18 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         {
             var itemBytes = ItemstackToBytes(itemStack);
             DatabaseAccessor.InventoryItem.UpdateInventoryItemSlot(toCoordinateKey, slotId, itemBytes);
+
+
+            // TODO: this below is a side effect that should get trigerred via message
+
+            var entityAtTarget =
+                Api.World.BlockAccessor.GetBlockEntity(DatabaseAccessor.CoordinateKeyToVec3i(toCoordinateKey)
+                    .ToBlockPos());
+
+            if (entityAtTarget is BlockEntityTemporalTransporter temporalTransporter)
+            {
+                temporalTransporter.UpdateInventory(Api);
+            }
         }
         catch (Exception e)
         {
@@ -340,25 +352,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
         if (api.Side == EnumAppSide.Server)
         {
-            var inventory =
-                DatabaseAccessor.InventoryItem.GetInventoryItems(DatabaseAccessor.GetCoordinateKey(Pos.ToVec3i()));
-
-            foreach (var inventoryItem in inventory)
-            {
-                if (inventoryItem.ItemBlob == null || inventoryItem.ItemBlob.Length == 0)
-                {
-                    continue;
-                }
-
-                using var memoryStream = new MemoryStream(inventoryItem.ItemBlob);
-                using var binaryReader = new BinaryReader(memoryStream);
-
-                var itemstack = new ItemStack(binaryReader, api.World);
-                var itemSlot = _inventory[inventoryItem.SlotId + 2];
-                itemSlot.Itemstack = itemstack;
-
-                itemSlot.MarkDirty();
-            }
+            UpdateInventory(api);
 
             return true;
         }
@@ -378,6 +372,29 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         _dialog?.SetIsConnected(IsConnected);
 
         return true;
+    }
+
+    private void UpdateInventory(ICoreAPI api)
+    {
+        var inventory =
+            DatabaseAccessor.InventoryItem.GetInventoryItems(DatabaseAccessor.GetCoordinateKey(Pos.ToVec3i()));
+
+        foreach (var inventoryItem in inventory)
+        {
+            if (inventoryItem.ItemBlob == null || inventoryItem.ItemBlob.Length == 0)
+            {
+                continue;
+            }
+
+            using var memoryStream = new MemoryStream(inventoryItem.ItemBlob);
+            using var binaryReader = new BinaryReader(memoryStream);
+
+            var itemstack = new ItemStack(binaryReader, api.World);
+            var itemSlot = _inventory[inventoryItem.SlotId + 2];
+            itemSlot.Itemstack = itemstack;
+
+            itemSlot.MarkDirty();
+        }
     }
 
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldForResolving)

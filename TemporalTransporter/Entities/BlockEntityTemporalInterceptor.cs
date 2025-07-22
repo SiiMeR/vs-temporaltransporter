@@ -24,7 +24,7 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
         _inventory = new InventoryGeneric(8, null, null, (id, self) =>
         {
             // received mail slots are take only
-            return new ItemSlotLimited(self, Array.Empty<string>(), true);
+            return new ItemSlotLimited(self, Array.Empty<string>());
         });
     }
 
@@ -117,6 +117,7 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
 
         if (api.Side == EnumAppSide.Server)
         {
+            // TODO: Stuff in this class needs to be refactored to not be a copy of the Transporter.
             var inventory =
                 DatabaseAccessor.InventoryItem.GetInventoryItems(DatabaseAccessor.GetCoordinateKey(Pos.ToVec3i()));
 

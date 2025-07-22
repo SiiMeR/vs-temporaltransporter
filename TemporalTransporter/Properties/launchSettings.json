@@ -1,16 +1,16 @@
 {
   "profiles": {
-    "Client": {
+    "Client1": {
       "commandName": "Executable",
       "executablePath": "dotnet",
       "commandLineArgs": "\"$(VINTAGE_STORY)/Vintagestory.dll\" --tracelog --addModPath \"$(ProjectDir)/bin/$(Configuration)/Mods\" --openWorld TestWorld",
       "workingDirectory": "$(VINTAGE_STORY)"
     },
-    "Client:Mainmenu": {
+    "Client2": {
       "commandName": "Executable",
       "executablePath": "dotnet",
-      "commandLineArgs": "\"$(VINTAGE_STORY)/Vintagestory.dll\" --tracelog --addModPath \"$(ProjectDir)/bin/$(Configuration)/Mods\"",
-      "workingDirectory": "$(VINTAGE_STORY)"
+      "commandLineArgs": "\"C:/Users/siimr/AppData/Roaming/Vintagestory2/Vintagestory.dll\" --tracelog  --dataPath=\"C:/Users/siimr/Downloads/client2\" --addModPath \"$(ProjectDir)/bin/$(Configuration)/Mods\"",
+      "workingDirectory": "C:/Users/siimr/AppData/Roaming/Vintagestory2"
     },
     "Server": {
       "commandName": "Executable",
