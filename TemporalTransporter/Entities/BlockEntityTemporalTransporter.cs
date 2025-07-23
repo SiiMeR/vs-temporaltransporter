@@ -203,6 +203,13 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
         var interceptors = DatabaseAccessor.Interceptor.GetAllInterceptors();
 
+        // order interceptors by distance to the sender
+        interceptors = interceptors.OrderBy(i =>
+        {
+            var interceptorPos = DatabaseAccessor.CoordinateKeyToVector3(i.CoordinateKey);
+            return Vector3.DistanceSquared(new Vector3(senderPos.X, senderPos.Y, senderPos.Z), interceptorPos);
+        }).ToArray();
+
         var targetPosition = toPosition;
         foreach (var interceptor in interceptors)
         {

@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 using Vintagestory.API.MathTools;
 
 namespace TemporalTransporter.Database;
@@ -104,5 +105,29 @@ public static class DatabaseAccessor
         }
 
         return new Vec3i(x, y, z);
+    }
+
+    public static Vector3 CoordinateKeyToVector3(string coordinateKey)
+    {
+        var (x, y, z) = ParseCoords(coordinateKey);
+
+        return new Vector3(x, y, z);
+    }
+
+    private static (float x, float y, float z) ParseCoords(string coordinateKey)
+    {
+        var coords = coordinateKey.Split(':');
+        if (coords.Length != 3)
+        {
+            throw new ArgumentException("Invalid coordinate key format. Expected format: 'x:y:z'.");
+        }
+
+        if (!float.TryParse(coords[0], out var x) || !float.TryParse(coords[1], out var y) ||
+            !float.TryParse(coords[2], out var z))
+        {
+            throw new ArgumentException("Coordinate key contains non-float values.");
+        }
+
+        return (x, y, z);
     }
 }
