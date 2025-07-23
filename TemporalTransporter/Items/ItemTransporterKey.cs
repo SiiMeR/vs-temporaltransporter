@@ -20,4 +20,11 @@ public class ItemTransporterKey : Item
         return new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", length)
             .Select(s => s[new Random().Next(s.Length)]).ToArray());
     }
+
+    public override string GetHeldItemName(ItemStack itemStack)
+    {
+        var keyCode = itemStack.Attributes.GetString("keycode", "Unknown");
+
+        return $"{base.GetHeldItemName(itemStack)} ({keyCode})";
+    }
 }
