@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using TemporalTransporter.Database;
 using TemporalTransporter.GUI;
 using Vintagestory.API.Client;
@@ -58,29 +57,7 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
 
         DatabaseAccessor.InventoryItem
             .UpdateInventoryItemSlot(DatabaseAccessor.GetCoordinateKey(Pos.ToVec3i()),
-                slotId, ItemstackToBytes(itemStack));
-    }
-
-    private static byte[] ItemstackToBytes(ItemStack? itemStack)
-    {
-        if (itemStack == null)
-        {
-            return Array.Empty<byte>();
-        }
-
-        MemoryStream? stream = null;
-        try
-        {
-            stream = new MemoryStream();
-            using var binaryWriter = new BinaryWriter(stream);
-            itemStack.ToBytes(binaryWriter);
-            return stream.ToArray();
-        }
-        catch
-        {
-            stream?.Dispose();
-            throw;
-        }
+                slotId, BlockEntitySharedLogic.ItemstackToBytes(itemStack));
     }
 
 
@@ -132,26 +109,7 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
 
         if (api.Side == EnumAppSide.Server)
         {
-            // TODO: Stuff in this class needs to be refactored to not be a copy of the Transporter.
-            var inventory =
-                DatabaseAccessor.InventoryItem.GetInventoryItems(DatabaseAccessor.GetCoordinateKey(Pos.ToVec3i()));
-
-            foreach (var inventoryItem in inventory)
-            {
-                if (inventoryItem.ItemBlob == null || inventoryItem.ItemBlob.Length == 0)
-                {
-                    continue;
-                }
-
-                using var memoryStream = new MemoryStream(inventoryItem.ItemBlob);
-                using var binaryReader = new BinaryReader(memoryStream);
-
-                var itemstack = new ItemStack(binaryReader, api.World);
-                var itemSlot = _inventory[inventoryItem.SlotId];
-                itemSlot.Itemstack = itemstack;
-
-                itemSlot.MarkDirty();
-            }
+            BlockEntitySharedLogic.UpdateInventory(api, Inventory, Pos.ToVec3i());
 
             return true;
         }
@@ -164,9 +122,9 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
         toggleInventoryDialogClient(byPlayer, () =>
         {
             _dialog ??= new GuiDialogTemporalInterceptor(Inventory, Pos, capi, this);
+
             return _dialog;
         });
-
 
         return true;
     }

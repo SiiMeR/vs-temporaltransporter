@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Numerics;
 using TemporalTransporter.Database;
@@ -74,7 +73,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         {
             DatabaseAccessor.InventoryItem
                 .UpdateInventoryItemSlot(DatabaseAccessor.GetCoordinateKey(Pos.ToVec3i()),
-                    slotId - 2, ItemstackToBytes(itemStack));
+                    slotId - 2, BlockEntitySharedLogic.ItemstackToBytes(itemStack));
 
             return;
         }
@@ -273,7 +272,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
     {
         try
         {
-            var itemBytes = ItemstackToBytes(itemStack);
+            var itemBytes = BlockEntitySharedLogic.ItemstackToBytes(itemStack);
             DatabaseAccessor.InventoryItem.UpdateInventoryItemSlot(toCoordinateKey, slotId, itemBytes);
 
 
@@ -285,34 +284,13 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
             if (entityAtTarget is BlockEntityTemporalTransporter temporalTransporter)
             {
-                temporalTransporter.UpdateInventory(Api);
+                BlockEntitySharedLogic.UpdateInventory(Api, temporalTransporter.Inventory,
+                    temporalTransporter.Pos.ToVec3i());
             }
         }
         catch (Exception e)
         {
             Api.World.Logger.Error($"Failed to move item {itemStack} from {Pos} to {toCoordinateKey}: {e.Message}");
-        }
-    }
-
-    private static byte[] ItemstackToBytes(ItemStack? itemStack)
-    {
-        if (itemStack == null)
-        {
-            return Array.Empty<byte>();
-        }
-
-        MemoryStream? stream = null;
-        try
-        {
-            stream = new MemoryStream();
-            using var binaryWriter = new BinaryWriter(stream);
-            itemStack.ToBytes(binaryWriter);
-            return stream.ToArray();
-        }
-        catch
-        {
-            stream?.Dispose();
-            throw;
         }
     }
 
@@ -352,7 +330,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
         if (api.Side == EnumAppSide.Server)
         {
-            UpdateInventory(api);
+            BlockEntitySharedLogic.UpdateInventory(api, Inventory, Pos.ToVec3i());
 
             return true;
         }
@@ -372,29 +350,6 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         _dialog?.SetIsConnected(IsConnected);
 
         return true;
-    }
-
-    private void UpdateInventory(ICoreAPI api)
-    {
-        var inventory =
-            DatabaseAccessor.InventoryItem.GetInventoryItems(DatabaseAccessor.GetCoordinateKey(Pos.ToVec3i()));
-
-        foreach (var inventoryItem in inventory)
-        {
-            if (inventoryItem.ItemBlob == null || inventoryItem.ItemBlob.Length == 0)
-            {
-                continue;
-            }
-
-            using var memoryStream = new MemoryStream(inventoryItem.ItemBlob);
-            using var binaryReader = new BinaryReader(memoryStream);
-
-            var itemstack = new ItemStack(binaryReader, api.World);
-            var itemSlot = _inventory[inventoryItem.SlotId + 2];
-            itemSlot.Itemstack = itemstack;
-
-            itemSlot.MarkDirty();
-        }
     }
 
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldForResolving)
