@@ -4,13 +4,13 @@
   entityClass: "TemporalInterceptor",
   behaviors: [
     {
-      name: "HorizontalOrientable"
-    },
-    {
       name: "Container"
     }
   ],
   entityBehaviors: [
+    {
+      name: "Animatable"
+    },
     {
       name: "Uncoverable"
     },
@@ -27,10 +27,6 @@
       states: [
         "normal"
       ]
-    },
-    {
-      code: "side",
-      loadFromProperties: "game:abstract/horizontalorientation"
     }
   ],
   drawtype: "json",
@@ -46,23 +42,9 @@
       "*"
     ]
   },
-  shapeByType: {
-    "*-north": {
-      base: "temporalinterceptor",
-      rotateY: 0
-    },
-    "*-east": {
-      base: "temporalinterceptor",
-      rotateY: 270
-    },
-    "*-south": {
-      base: "temporalinterceptor",
-      rotateY: 180
-    },
-    "*-west": {
-      base: "temporalinterceptor",
-      rotateY: 90
-    }
+  shape: {
+    base: "temporalinterceptor",
+    rotateY: 0
   },
   resistance: 30,
   sideopaque: {

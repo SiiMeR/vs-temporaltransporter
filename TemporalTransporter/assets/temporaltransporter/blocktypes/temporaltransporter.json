@@ -27,10 +27,6 @@
       states: [
         "normal"
       ]
-    },
-    {
-      code: "side",
-      loadFromProperties: "game:abstract/horizontalorientation"
     }
   ],
   drawtype: "json",
@@ -46,23 +42,9 @@
       "*"
     ]
   },
-  shapeByType: {
-    "*-north": {
-      base: "temporaltransporter",
-      rotateY: 0
-    },
-    "*-east": {
-      base: "temporaltransporter",
-      rotateY: 270
-    },
-    "*-south": {
-      base: "temporaltransporter",
-      rotateY: 180
-    },
-    "*-west": {
-      base: "temporaltransporter",
-      rotateY: 90
-    }
+  shape: {
+    base: "temporaltransporter",
+    rotateY: 0
   },
   resistance: 30,
   sideopaque: {

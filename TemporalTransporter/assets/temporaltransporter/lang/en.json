@@ -1,6 +1,6 @@
 {
-  "block-temporaltransporter-normal-*": "Temporal Transporter",
-  "block-temporalinterceptor-normal-*": "Temporal Interceptor",
+  "block-temporaltransporter-normal": "Temporal Transporter",
+  "block-temporalinterceptor-normal": "Temporal Interceptor",
   "item-transporterkey": "Temporal Key",
   "error-temporaltransporter-destinationfull": "The destination temporal transporter is full!"
 }

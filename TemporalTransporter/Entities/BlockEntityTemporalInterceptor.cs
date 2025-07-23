@@ -5,6 +5,7 @@ using TemporalTransporter.GUI;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
+using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
 
 namespace TemporalTransporter.Entities;
@@ -28,6 +29,8 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
         });
     }
 
+    private BlockEntityAnimationUtil? AnimUtil => GetBehavior<BEBehaviorAnimatable>()?.animUtil;
+
 
     public override InventoryBase Inventory => _inventory;
     public override string InventoryClassName { get; } = "temporalinterceptorInv";
@@ -37,6 +40,11 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
         _inventory.LateInitialize($"{InventoryClassName}-{Pos}", api);
         _inventory.SlotModified += OnItemSlotModified;
         base.Initialize(api);
+
+        if (api.World.Side == EnumAppSide.Client)
+        {
+            AnimUtil?.InitializeAnimator("interceptor", null, null, new Vec3f(0, Block.Shape.rotateY, 0));
+        }
     }
 
     private void OnItemSlotModified(int slotId)
@@ -114,6 +122,13 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
     public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
     {
         var api = byPlayer.Entity.World.Api;
+
+        AnimUtil?.StartAnimation(new AnimationMetaData
+        {
+            Animation = "active",
+            Code = "active",
+            AnimationSpeed = 1.0f
+        });
 
         if (api.Side == EnumAppSide.Server)
         {
