@@ -200,6 +200,7 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
     public void SetIsConnected(bool isConnected)
     {
         _isConnected = isConnected;
+        Redraw();
     }
 
     public void Redraw()

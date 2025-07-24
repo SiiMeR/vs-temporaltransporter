@@ -6,6 +6,7 @@ using TemporalTransporter.Items;
 using TemporalTransporter.Messages;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.MathTools;
 using Vintagestory.API.Server;
 
 namespace TemporalTransporter;
@@ -45,14 +46,14 @@ public class TemporalTransporterModSystem : ModSystem
             throw new InvalidOperationException("ClientApi is not initialized.");
         }
 
-        // foreach (var transporterId in packet.TransporterIds)
-        // {
-        //     var coords = transporterId.Split(':').Select(t => Convert.ToInt32(t)).ToArray();
-        //     var blockPos = new BlockPos(coords[0], coords[1], coords[2]);
-        //     var blockEntity = ClientApi.World.BlockAccessor.GetBlockEntity<BlockEntityTemporalTransporter>(blockPos);
-        //
-        //     blockEntity.SetIsConnected(true);
-        // }
+        foreach (var transporterId in packet.TransporterIds)
+        {
+            var coords = DatabaseAccessor.CoordinateKeyToVec3i(transporterId);
+            var blockPos = new BlockPos(coords.X, coords.Y, coords.Z);
+            var blockEntity = ClientApi.World.BlockAccessor.GetBlockEntity<BlockEntityTemporalTransporter>(blockPos);
+
+            blockEntity?.SetIsConnected(true);
+        }
     }
 
     public override void StartServerSide(ICoreServerAPI api)
