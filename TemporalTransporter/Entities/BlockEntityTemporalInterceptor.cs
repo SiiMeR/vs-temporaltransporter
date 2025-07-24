@@ -14,6 +14,7 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
     private readonly InventoryGeneric _inventory;
     private GuiDialogTemporalInterceptor? _dialog;
 
+
     public BlockEntityTemporalInterceptor(InventoryGeneric inventory)
     {
         _inventory = inventory;
@@ -27,6 +28,8 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
             return new ItemSlotLimited(self, Array.Empty<string>());
         });
     }
+
+    public int ChargeCount { get; set; }
 
     private BlockEntityAnimationUtil? AnimUtil => GetBehavior<BEBehaviorAnimatable>()?.animUtil;
 
@@ -44,6 +47,56 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
         {
             AnimUtil?.InitializeAnimator("interceptor", null, null, new Vec3f(0, Block.Shape.rotateY, 0));
         }
+
+        api.Event.RegisterEventBusListener(OnChargeAdded, filterByEventName: Events.Charged);
+        api.Event.RegisterEventBusListener(OnDisabledStateChanged, filterByEventName: Events.SetDisabledState);
+    }
+
+    private void OnDisabledStateChanged(string eventName, ref EnumHandling handling, IAttribute data)
+    {
+        if (data is not ITreeAttribute tree)
+        {
+            return;
+        }
+
+        var pos = tree.GetVec3i("position");
+        if (Pos.ToVec3i() != pos)
+        {
+            return;
+        }
+
+        var isDisabled = tree.GetBool("isDisabled");
+        if (isDisabled)
+        {
+            Disable();
+        }
+        else
+        {
+            Enable();
+        }
+    }
+
+    private void OnChargeAdded(string eventName, ref EnumHandling handling, IAttribute data)
+    {
+        if (data is not ITreeAttribute tree)
+        {
+            return;
+        }
+
+        var pos = tree.GetVec3i("position");
+        if (Pos.ToVec3i() != pos)
+        {
+            return;
+        }
+
+        ChargeCount += 1;
+
+        if (Api.Side == EnumAppSide.Server)
+        {
+            DatabaseAccessor.Charge.IncrementCharge(pos);
+        }
+
+        _dialog?.UpdateChargeCount();
     }
 
     private void OnItemSlotModified(int slotId)

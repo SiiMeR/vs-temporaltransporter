@@ -1,4 +1,6 @@
-﻿using TemporalTransporter.Entities;
+﻿using System;
+using TemporalTransporter.Entities;
+using TemporalTransporter.Helpers;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
@@ -42,9 +44,12 @@ public class GuiDialogTemporalInterceptor : GuiDialogBlockEntity
 
         var dialogBounds = ElementStdBounds.AutosizedMainDialog;
 
-        var receivedMailBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, 0, 50, 4, 1);
+        var receivedMailBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, 0, 70, 4, 1);
         var receivedMailBounds2 =
             ElementStdBounds.SlotGrid(EnumDialogArea.None, 0, receivedMailBounds.fixedY + 50, 4, 1);
+
+        var chargesTextBounds = ElementBounds.Fixed(2, 20, 80, 20);
+        var chargeCountBounds = chargesTextBounds.RightCopy(-10);
 
         SingleComposer = capi.Gui
             .CreateCompo("temporalinterceptorgui", dialogBounds)
@@ -56,7 +61,12 @@ public class GuiDialogTemporalInterceptor : GuiDialogBlockEntity
                 CairoFont.WhiteSmallText().WithFontSize(13).WithColor(new[] { 1d, 0d, 0d, 1d }),
                 ElementBounds.Fixed(0, 100, 180, 20))
             .EndIf()
-            .AddStaticText("Received Mail", CairoFont.WhiteSmallText(), ElementBounds.Fixed(0, 20, 200, 20),
+            .AddStaticText($"{Util.LangStr("charges-text")}:", CairoFont.WhiteSmallText().WithFontSize(15),
+                chargesTextBounds,
+                "chargesText")
+            .AddDynamicText(_blockEntity.ChargeCount.ToString(), CairoFont.WhiteSmallText().WithFontSize(15),
+                chargeCountBounds, "chargeCount")
+            .AddStaticText("Received Mail", CairoFont.WhiteSmallText(), ElementBounds.Fixed(2, 45, 200, 20),
                 "receivedMailTitle")
             .AddItemSlotGrid(Inventory, SendInvPacket, 4, new[] { 0, 1, 2, 3 }, receivedMailBounds,
                 "receivedMailBounds")
@@ -67,6 +77,18 @@ public class GuiDialogTemporalInterceptor : GuiDialogBlockEntity
 
 
         return true;
+    }
+
+    public void UpdateChargeCount()
+    {
+        if (!SingleComposer.Composed)
+        {
+            return;
+        }
+
+        var chargeCount = Math.Max(_blockEntity.ChargeCount, 0);
+
+        SingleComposer.GetDynamicText("chargeCount").SetNewText(chargeCount.ToString());
     }
 
 

@@ -1,6 +1,7 @@
 ﻿using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
+using Vintagestory.GameContent;
 
 namespace TemporalTransporter.Behaviors;
 
@@ -22,6 +23,11 @@ public class BlockBehaviorChargeable : BlockBehavior
         if (blockEntity == null)
         {
             world.Api.Logger.Error("Tried to charge a block that has no block entity at {0}", blockSel.Position);
+            return base.OnBlockInteractStart(world, byPlayer, blockSel, ref handling);
+        }
+
+        if (byPlayer.InventoryManager.ActiveHotbarSlot.Itemstack?.Collectible is not ItemRustyGear)
+        {
             return base.OnBlockInteractStart(world, byPlayer, blockSel, ref handling);
         }
 

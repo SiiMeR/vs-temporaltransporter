@@ -1,5 +1,4 @@
-﻿using TemporalTransporter.Entities;
-using Vintagestory.API.Common;
+﻿using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
 
 namespace TemporalTransporter.Behaviors;
@@ -28,22 +27,14 @@ public class BlockEntityBehaviorUncoverable : BlockEntityBehavior
 
     private void EveryXSeconds(float _)
     {
-        // TODO: interceptor blocking, message bus messaging
-        if (Blockentity is not BlockEntityTemporalTransporter transporter)
-        {
-            return;
-        }
-
         var rainmapHeight = Api.World.BlockAccessor.GetRainMapHeightAt(Pos);
 
-        // something covering it
-        if (rainmapHeight > Pos.Y)
-        {
-            transporter.Disable();
-        }
-        else
-        {
-            transporter.Enable();
-        }
+        var isDisabled = rainmapHeight > Pos.Y;
+
+        var tree = new TreeAttribute();
+        tree.SetBool("isDisabled", isDisabled);
+        tree.SetVec3i("position", Pos.ToVec3i());
+
+        Api.Event.PushEvent(Events.SetDisabledState);
     }
 }

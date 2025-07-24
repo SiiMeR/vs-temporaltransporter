@@ -8,6 +8,8 @@ namespace TemporalTransporter.Entities;
 
 public static class BlockEntitySharedLogic
 {
+    public static int SyncChargesPacketId = 1338;
+
     public static void UpdateInventory(ICoreAPI api, IInventory inventory, Vec3i atPos)
     {
         var inventoryItems =
@@ -24,7 +26,7 @@ public static class BlockEntitySharedLogic
             using var binaryReader = new BinaryReader(memoryStream);
 
             var itemstack = new ItemStack(binaryReader, api.World);
-            var itemSlot = inventory[inventoryItem.SlotId + 2]; // BUG
+            var itemSlot = inventory[inventoryItem.SlotId];
             itemSlot.Itemstack = itemstack;
 
             itemSlot.MarkDirty();

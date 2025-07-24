@@ -31,7 +31,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
     {
         _inventory = new InventoryGeneric(10, null, null, (id, self) =>
         {
-            if (id == 0)
+            if (id == InputSlotIndex)
             {
                 return new ItemSlotLimited(self,
                     new[]
@@ -40,7 +40,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
                     });
             }
 
-            if (id == 1)
+            if (id == KeySlotIndex)
             {
                 return new ItemSlotLimited(self, new[] { "transporterkey" });
             }
@@ -50,10 +50,18 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         });
     }
 
+    public int InputSlotIndex => 8;
+    public ItemSlot InputSlot => _inventory[InputSlotIndex];
+
+    public int KeySlotIndex => 9;
+    public ItemSlot KeySlot => _inventory[KeySlotIndex];
+
 
     public override InventoryBase Inventory => _inventory;
     public override string InventoryClassName { get; } = "temporaltransporterInv";
     public int ChargeCount { get; set; }
+
+    public static int SendItemPacketId => 1337;
 
     public override void Initialize(ICoreAPI api)
     {
@@ -62,6 +70,31 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         base.Initialize(api);
 
         api.Event.RegisterEventBusListener(OnChargeAdded, filterByEventName: Events.Charged);
+        api.Event.RegisterEventBusListener(OnDisabledStateChanged, filterByEventName: Events.SetDisabledState);
+    }
+
+    private void OnDisabledStateChanged(string eventName, ref EnumHandling handling, IAttribute data)
+    {
+        if (data is not ITreeAttribute tree)
+        {
+            return;
+        }
+
+        var pos = tree.GetVec3i("position");
+        if (Pos.ToVec3i() != pos)
+        {
+            return;
+        }
+
+        var isDisabled = tree.GetBool("isDisabled");
+        if (isDisabled)
+        {
+            Disable();
+        }
+        else
+        {
+            Enable();
+        }
     }
 
     private void OnChargeAdded(string eventName, ref EnumHandling handling, IAttribute data)
@@ -95,16 +128,16 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         }
 
         var itemStack = _inventory[slotId].Itemstack;
-        if (slotId > 1)
+        if (slotId < 8)
         {
             DatabaseAccessor.InventoryItem
                 .UpdateInventoryItemSlot(DatabaseAccessor.GetCoordinateKey(Pos.ToVec3i()),
-                    slotId - 2, BlockEntitySharedLogic.ItemstackToBytes(itemStack));
+                    slotId, BlockEntitySharedLogic.ItemstackToBytes(itemStack));
 
             return;
         }
 
-        if (slotId == 1)
+        if (slotId == KeySlotIndex)
         {
             if (itemStack == null)
             {
@@ -172,9 +205,14 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         base.OnBlockPlaced(byItemStack);
     }
 
+    public override void OnReceivedServerPacket(int packetid, byte[] data)
+    {
+        base.OnReceivedServerPacket(packetid, data);
+    }
+
     public override void OnReceivedClientPacket(IPlayer player, int packetid, byte[] data)
     {
-        if (packetid == 1337)
+        if (packetid == SendItemPacketId)
         {
             OnSendItem(player);
             return;
@@ -196,7 +234,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
             return;
         }
 
-        if (Api.Side != EnumAppSide.Server || _inventory[0].Itemstack == null)
+        if (Api.Side != EnumAppSide.Server || InputSlot.Itemstack == null)
         {
             return;
         }
@@ -206,7 +244,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
             return;
         }
 
-        var connectionKey = _inventory[1].Itemstack?.Attributes?.GetString("keycode");
+        var connectionKey = KeySlot.Itemstack?.Attributes?.GetString("keycode");
         if (string.IsNullOrWhiteSpace(connectionKey))
         {
             return;
@@ -245,13 +283,16 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         }).ToArray();
 
         var targetPosition = toPosition;
+        var targetIsInterceptor = false;
         foreach (var interceptor in interceptors)
         {
             var interceptorPos = DatabaseAccessor.CoordinateKeyToVec3i(interceptor.CoordinateKey);
 
-            if (IsInterceptorCatchingBeam(senderPos, receiverPos, interceptorPos, 10f) && HasFreeSlot(interceptorPos))
+            if (IsInterceptorCatchingBeam(senderPos, receiverPos, interceptorPos, 10f) && HasFreeSlot(interceptorPos) &&
+                HasCharge(interceptorPos))
             {
                 targetPosition = interceptor.CoordinateKey;
+                targetIsInterceptor = true;
                 break;
             }
         }
@@ -266,14 +307,19 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         }
 
 
-        var itemStack = _inventory[0].TakeOut(1);
+        var itemStack = InputSlot.TakeOut(1);
         MoveItemToPosition(itemStack, targetPosition, suitableSlot);
-        _inventory.MarkSlotDirty(0);
+        _inventory.MarkSlotDirty(InputSlotIndex);
 
 
         // TODO: These 3 should be tied together into an atomic operation (perhaps having db be the sot)
         DatabaseAccessor.Charge.DecrementCharge(Pos.ToVec3i());
         ChargeCount -= 1;
+
+        if (targetIsInterceptor)
+        {
+            DatabaseAccessor.Charge.DecrementCharge(DatabaseAccessor.CoordinateKeyToVec3i(targetPosition));
+        }
 
         Api.World
             .PlaySoundAt(new AssetLocation("game:sounds/effect/translocate-breakdimension"),
@@ -282,6 +328,11 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
         var weatherSys = Api.ModLoader.GetModSystem<WeatherSystemServer>();
         weatherSys.SpawnLightningFlash(DatabaseAccessor.CoordinateKeyToVec3d(targetPosition));
+    }
+
+    private bool HasCharge(Vec3i interceptorPos)
+    {
+        return DatabaseAccessor.Charge.GetChargeCount(interceptorPos) > 0;
     }
 
     private bool HasFreeSlot(Vec3i interceptorPos)
@@ -359,8 +410,8 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
             }
         }
 
-        Inventory[1].TakeOut(1);
-        Inventory.MarkSlotDirty(1);
+        KeySlot.TakeOut(1);
+        Inventory.MarkSlotDirty(KeySlotIndex);
 
         base.OnBlockRemoved();
     }
@@ -413,7 +464,6 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         Inventory.FromTreeAttributes(tree.GetTreeAttribute("inventory"));
         IsDisabled = tree.GetBool("disabled");
         IsConnected = tree.GetBool("connected");
-        ChargeCount = tree.GetInt("chargeCount");
 
         base.FromTreeAttributes(tree, worldForResolving);
     }
@@ -426,7 +476,6 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         tree["inventory"] = invtree;
         tree.SetBool("disabled", IsDisabled);
         tree.SetBool("connected", IsConnected);
-        tree.SetInt("chargeCount", ChargeCount);
     }
 
     public void Disable()

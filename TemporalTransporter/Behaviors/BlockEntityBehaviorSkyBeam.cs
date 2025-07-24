@@ -101,7 +101,7 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
         var minPosX = Random.Shared.NextDouble() * multiplier * 2 - multiplier;
         var minPosZ = Random.Shared.NextDouble() * multiplier * 2 - multiplier;
 
-        _beam.MinPos.Set(Pos.X + 0.5, Pos.Y + 1.1, Pos.Z + 0.5);
+        _beam.MinPos.Set(Pos.X + 0.5, Pos.Y + 0.6, Pos.Z + 0.5);
         _beam.AddPos.Set(minPosX, 3, minPosZ);
 
         Api.World.SpawnParticles(_beam);
