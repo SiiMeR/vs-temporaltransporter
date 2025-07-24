@@ -10,8 +10,9 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
 {
     private float _accum;
 
-    private int _colorRgba = ColorUtil.ColorFromRgba(0, 0, 0, 255);
+    private SimpleParticleProperties _beam;
 
+    private int _colorRgba = ColorUtil.ColorFromRgba(0, 0, 0, 255);
     private long _listenerId;
 
     public BlockEntityBehaviorSkyBeam(BlockEntity blockentity) : base(blockentity)
@@ -22,6 +23,17 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
     {
         var colorRgba = properties["beamColorRGBA"].AsString().Split(",").Select(c => Convert.ToInt32(c)).ToArray();
         _colorRgba = ColorUtil.ColorFromRgba(colorRgba[0], colorRgba[1], colorRgba[2], colorRgba[3]);
+
+        _beam = new SimpleParticleProperties(
+                2, 5,
+                _colorRgba,
+                new Vec3d(), new Vec3d(),
+                new Vec3f(0, 0.5f, 0), new Vec3f(0, 1f, 0),
+                1f, 0f, 0.08f, 0.18f,
+                EnumParticleModel.Quad
+            )
+            { SelfPropelled = true, VertexFlags = 255 };
+
 
         if (api is { Side: EnumAppSide.Client })
         {
@@ -60,6 +72,7 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
         var rainmapHeight = Api.World.BlockAccessor.GetRainMapHeightAt(Pos);
 
         // something covering it
+        // TODO: use the disabled prop
         if (rainmapHeight > Pos.Y)
         {
             return;
@@ -73,16 +86,6 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
             return;
         }
 
-
-        var beam = new SimpleParticleProperties(
-                2, 5,
-                _colorRgba,
-                new Vec3d(), new Vec3d(),
-                new Vec3f(0, 0.5f, 0), new Vec3f(0, 1f, 0),
-                1f, 0f, 0.08f, 0.18f,
-                EnumParticleModel.Quad
-            )
-            { SelfPropelled = true, VertexFlags = 255 };
 
         _accum += dt;
         if (_accum < 0.15f)
@@ -98,9 +101,9 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
         var minPosX = Random.Shared.NextDouble() * multiplier * 2 - multiplier;
         var minPosZ = Random.Shared.NextDouble() * multiplier * 2 - multiplier;
 
-        beam.MinPos.Set(Pos.X + 0.5, Pos.Y + 1.1, Pos.Z + 0.5);
-        beam.AddPos.Set(minPosX, 3, minPosZ);
+        _beam.MinPos.Set(Pos.X + 0.5, Pos.Y + 1.1, Pos.Z + 0.5);
+        _beam.AddPos.Set(minPosX, 3, minPosZ);
 
-        Api.World.SpawnParticles(beam);
+        Api.World.SpawnParticles(_beam);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using TemporalTransporter.Entities;
+using TemporalTransporter.Helpers;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
@@ -13,7 +14,7 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
 
     public GuiDialogTemporalTransporter(InventoryBase inventory, BlockPos bePos, ICoreClientAPI capi,
         BlockEntityTemporalTransporter blockEntity) :
-        base("Temporal Transporter", inventory, bePos, capi)
+        base(Util.LangStr("block-temporaltransporter"), inventory, bePos, capi)
     {
         _blockEntity = blockEntity;
         Inventory.SlotModified += OnItemSlotModified;
@@ -49,12 +50,16 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
 
         var dialogBounds = ElementStdBounds.AutosizedMainDialog;
 
-        var inputSlotBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, 0, 30, 1, 1);
+        var inputTextBounds = ElementBounds.Fixed(2, 21, 50, 20);
+        var inputSlotBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, 0, 40, 1, 1);
+
+        var keyslotTextBounds = ElementBounds.Fixed(152, 21, 50, 20);
+
         var keySlotBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None,
-            150, 30, 1, 1);
+            150, 40, 1, 1);
 
         var sendButtonBounds =
-            ElementBounds.Fixed(60, 30, 80, GuiElementPassiveItemSlot.unscaledSlotSize);
+            ElementBounds.Fixed(60, 40, 80, GuiElementPassiveItemSlot.unscaledSlotSize);
 
         var top = inputSlotBounds.fixedHeight + inputSlotBounds.fixedY + 70;
 
@@ -64,16 +69,22 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
 
         var receivedMailBounds2 = ElementStdBounds.SlotGrid(EnumDialogArea.None, 0, top, 4, 1);
 
+        var chargesTextBounds = ElementBounds.Fixed(2, 95, 80, 20);
+        var chargeCountBounds = chargesTextBounds.RightCopy();
         SingleComposer = capi.Gui
             .CreateCompo("temporaltransportergui", dialogBounds)
             .AddShadedDialogBG(bgBounds)
             .AddDialogTitleBar(DialogTitle, OnTitleBarClose)
             .BeginChildElements(bgBounds)
+            .AddStaticText(Util.LangStr("temporaltransporter-input-text"),
+                CairoFont.WhiteSmallText().WithFontSize(14), inputTextBounds, "inputText")
             .AddItemSlotGrid(Inventory, SendInvPacket, 1, new[] { 0 }, inputSlotBounds, "inputslot")
             .AddIf(_isConnected)
             .AddPassiveItemSlot(keySlotBounds, Inventory, Inventory[1])
             .EndIf()
             .AddIf(!_isConnected)
+            .AddStaticText(Util.LangStr("temporaltransporter-key-text"),
+                CairoFont.WhiteSmallText().WithFontSize(14), keyslotTextBounds, "keyslotText")
             .AddItemSlotGrid(Inventory, SendInvPacket, 1, new[] { 1 }, keySlotBounds, "keyslot")
             .EndIf()
             .AddButton("Send", OnSendClick, sendButtonBounds, CairoFont.SmallButtonText(), EnumButtonStyle.Normal,
@@ -83,7 +94,13 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
                 CairoFont.WhiteSmallText().WithFontSize(14).WithColor(new[] { 1d, 0d, 0d, 1d }),
                 ElementBounds.Fixed(0, 100, 200, 20))
             .EndIf()
-            .AddStaticText("Received Mail", CairoFont.WhiteSmallText(), ElementBounds.Fixed(0, 125, 200, 20),
+            .AddStaticText($"{Util.LangStr("charges-text")}:", CairoFont.WhiteSmallText().WithFontSize(14),
+                chargesTextBounds,
+                "chargesText")
+            .AddDynamicText(_blockEntity.ChargeCount.ToString(), CairoFont.WhiteSmallText().WithFontSize(14),
+                chargeCountBounds, "chargeCount")
+            .AddStaticText(Util.LangStr("temporaltransporter-output-text"), CairoFont.WhiteSmallText(),
+                ElementBounds.Fixed(2, 140, 200, 20),
                 "receivedMailTitle")
             .AddItemSlotGrid(Inventory, SendInvPacket, 4, new[] { 2, 3, 4, 5 }, receivedMailBounds,
                 "receivedMailBounds")
@@ -92,8 +109,28 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
             .EndChildElements()
             .Compose();
 
+        UpdateSendButtonState();
 
         return true;
+    }
+
+
+    public void UpdateChargeCount()
+    {
+        if (!SingleComposer.Composed)
+        {
+            return;
+        }
+
+        var chargeCount = Math.Max(_blockEntity.ChargeCount, 0);
+
+        SingleComposer.GetDynamicText("chargeCount").SetNewText(chargeCount.ToString());
+        UpdateSendButtonState();
+    }
+
+    public void UpdateSendButtonState()
+    {
+        SingleComposer.GetButton("sendButton").Enabled = !Inventory[0].Empty && _blockEntity.ChargeCount > 0 && !Inventory[1].Empty;
     }
 
     private void OnItemSlotModified(int slotId)
@@ -110,7 +147,7 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
 
         var itemStack = Inventory[slotId].Itemstack;
 
-        SingleComposer.GetButton("sendButton").Enabled = itemStack != null;
+        SingleComposer.GetButton("sendButton").Enabled = itemStack != null && _blockEntity.ChargeCount > 0;
     }
 
 
@@ -131,6 +168,10 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
 
         capi.Network.SendBlockEntityPacket(BlockEntityPosition.X, BlockEntityPosition.Y,
             BlockEntityPosition.Z, packet);
+
+        _blockEntity.ChargeCount -= 1;
+        UpdateChargeCount();
+
 
         return true;
     }

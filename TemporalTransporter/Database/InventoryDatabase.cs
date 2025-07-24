@@ -48,7 +48,7 @@ public class InventoryItemDatabase
             api.World.SavegameIdentifier,
             modId);
 
-        var path = Path.Combine(databaseDirectory, "InventoryItems.db");
+        var path = Path.Combine(databaseDirectory, DatabaseAccessor.DatabaseName);
         _connectionString = $"Data Source={path};";
 
         if (!Directory.Exists(databaseDirectory))

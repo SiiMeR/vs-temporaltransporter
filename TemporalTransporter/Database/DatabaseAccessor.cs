@@ -6,10 +6,13 @@ namespace TemporalTransporter.Database;
 
 public static class DatabaseAccessor
 {
+    public const string DatabaseName = "temporaltransporter.db";
+
     // initialized during server start. if this causes issues, it is for a reason.
     private static TransporterDatabase? _transporterDatabase;
     private static InterceptorDatabase? _interceptorDatabase;
     private static InventoryItemDatabase? _inventoryItemDatabase;
+    private static ChargeDatabase? _chargeDatabase;
 
     public static TransporterDatabase Transporter
     {
@@ -70,6 +73,26 @@ public static class DatabaseAccessor
             return _inventoryItemDatabase;
         }
         set => _inventoryItemDatabase = value;
+    }
+
+    public static ChargeDatabase Charge
+    {
+        get
+        {
+            if (TemporalTransporterModSystem.ServerApi == null)
+            {
+                throw new InvalidOperationException(
+                    "Tried to access Charge database from client side or before server initialization.");
+            }
+
+            if (_chargeDatabase == null)
+            {
+                throw new InvalidOperationException("Charge database has not been initialized.");
+            }
+
+            return _chargeDatabase;
+        }
+        set => _chargeDatabase = value;
     }
 
 

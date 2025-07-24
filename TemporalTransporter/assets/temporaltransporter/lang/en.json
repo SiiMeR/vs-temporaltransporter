@@ -1,6 +1,12 @@
 {
-  "block-temporaltransporter-normal": "Temporal Transporter",
-  "block-temporalinterceptor-normal": "Temporal Interceptor",
+  "block-temporaltransporter": "Temporal Transporter",
+  "block-temporalinterceptor": "Temporal Interceptor",
   "item-transporterkey": "Temporal Key",
-  "error-temporaltransporter-destinationfull": "The destination temporal transporter is full!"
+  "error-temporaltransporter-destinationfull": "The destination temporal transporter is full!",
+  "blockhelp-chargeable": "Add charge",
+  "temporaltransporter-input-text": "Input",
+  "temporaltransporter-key-text": "Key",
+  "temporaltransporter-charge-text": "Charges",
+  "temporaltransporter-output-text": "Received mail",
+  "charges-text": "Charges"
 }

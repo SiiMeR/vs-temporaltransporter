@@ -24,7 +24,7 @@ public static class BlockEntitySharedLogic
             using var binaryReader = new BinaryReader(memoryStream);
 
             var itemstack = new ItemStack(binaryReader, api.World);
-            var itemSlot = inventory[inventoryItem.SlotId + 2];
+            var itemSlot = inventory[inventoryItem.SlotId + 2]; // BUG
             itemSlot.Itemstack = itemstack;
 
             itemSlot.MarkDirty();

@@ -71,6 +71,7 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
             });
 
             DatabaseAccessor.InventoryItem.InitializeInventoryForPosition(Pos.ToVec3i());
+            DatabaseAccessor.Charge.InitializeCharges(Pos.ToVec3i());
         }
 
 
@@ -85,6 +86,7 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
             {
                 DatabaseAccessor.Interceptor.RemoveInterceptorByPosition(Pos.ToVec3i());
                 DatabaseAccessor.InventoryItem.ClearInventoryForPosition(Pos.ToVec3i());
+                DatabaseAccessor.Charge.DeleteChargeTrackingForPosition(Pos.ToVec3i());
             }
             catch (Exception e)
             {

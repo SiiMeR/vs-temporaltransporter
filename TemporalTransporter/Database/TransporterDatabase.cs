@@ -43,7 +43,7 @@ public class TransporterDatabase
             api.World.SavegameIdentifier,
             modId);
 
-        var path = Path.Combine(databaseDirectory, "Transporters.db");
+        var path = Path.Combine(databaseDirectory, DatabaseAccessor.DatabaseName);
         _connectionString = $"Data Source={path};";
 
         if (!Directory.Exists(databaseDirectory))

@@ -53,12 +53,38 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
     public override InventoryBase Inventory => _inventory;
     public override string InventoryClassName { get; } = "temporaltransporterInv";
+    public int ChargeCount { get; set; }
 
     public override void Initialize(ICoreAPI api)
     {
         _inventory.LateInitialize($"{InventoryClassName}-{Pos}", api);
         _inventory.SlotModified += OnItemSlotModified;
         base.Initialize(api);
+
+        api.Event.RegisterEventBusListener(OnChargeAdded, filterByEventName: Events.Charged);
+    }
+
+    private void OnChargeAdded(string eventName, ref EnumHandling handling, IAttribute data)
+    {
+        if (data is not ITreeAttribute tree)
+        {
+            return;
+        }
+
+        var pos = tree.GetVec3i("position");
+        if (Pos.ToVec3i() != pos)
+        {
+            return;
+        }
+
+        ChargeCount += 1;
+
+        if (Api.Side == EnumAppSide.Server)
+        {
+            DatabaseAccessor.Charge.IncrementCharge(pos);
+        }
+
+        _dialog?.UpdateChargeCount();
     }
 
     private void OnItemSlotModified(int slotId)
@@ -139,6 +165,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
             });
 
             DatabaseAccessor.InventoryItem.InitializeInventoryForPosition(Pos.ToVec3i());
+            DatabaseAccessor.Charge.InitializeCharges(Pos.ToVec3i());
         }
 
 
@@ -185,9 +212,16 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
             return;
         }
 
+        if (DatabaseAccessor.Charge.GetChargeCount(Pos.ToVec3i()) <= 0)
+        {
+            Api.Logger.Warning($"Tried to send item from transporter at {Pos} but no charges left. Shouldn't happen.");
+            return;
+        }
+
         var toPosition = DatabaseAccessor.Transporter.GetTransportersByConnectionKey(
                 connectionKey)
-            ?.First(transporter => transporter.CoordinateKey != DatabaseAccessor.GetCoordinateKey(Pos.ToVec3i()))
+            ?.FirstOrDefault(transporter =>
+                transporter.CoordinateKey != DatabaseAccessor.GetCoordinateKey(Pos.ToVec3i()))
             ?.CoordinateKey;
         if (string.IsNullOrWhiteSpace(toPosition))
         {
@@ -232,13 +266,19 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         }
 
 
+        var itemStack = _inventory[0].TakeOut(1);
+        MoveItemToPosition(itemStack, targetPosition, suitableSlot);
+        _inventory.MarkSlotDirty(0);
+
+
+        // TODO: These 3 should be tied together into an atomic operation (perhaps having db be the sot)
+        DatabaseAccessor.Charge.DecrementCharge(Pos.ToVec3i());
+        ChargeCount -= 1;
+
         Api.World
             .PlaySoundAt(new AssetLocation("game:sounds/effect/translocate-breakdimension"),
                 Pos.X, Pos.Y, Pos.Z,
                 null, true, 16f);
-        var itemStack = _inventory[0].TakeOut(1);
-        MoveItemToPosition(itemStack, targetPosition, suitableSlot);
-        _inventory.MarkSlotDirty(0);
 
         var weatherSys = Api.ModLoader.GetModSystem<WeatherSystemServer>();
         weatherSys.SpawnLightningFlash(DatabaseAccessor.CoordinateKeyToVec3d(targetPosition));
@@ -301,6 +341,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         }
     }
 
+
     public override void OnBlockRemoved()
     {
         if (Api.Side == EnumAppSide.Server)
@@ -309,6 +350,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
             {
                 DatabaseAccessor.Transporter.RemoveTransporterByPosition(Pos.ToVec3i());
                 DatabaseAccessor.InventoryItem.ClearInventoryForPosition(Pos.ToVec3i());
+                DatabaseAccessor.Charge.DeleteChargeTrackingForPosition(Pos.ToVec3i());
             }
             catch (Exception e)
             {
@@ -347,6 +389,13 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
             return true;
         }
 
+
+        // used for refueling, is it even needed if blockbehaviors are before this?
+        if (byPlayer.Entity.Controls.CtrlKey)
+        {
+            return true;
+        }
+
         toggleInventoryDialogClient(byPlayer, () =>
         {
             _dialog ??= new GuiDialogTemporalTransporter(Inventory, Pos, capi, this);
@@ -364,6 +413,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         Inventory.FromTreeAttributes(tree.GetTreeAttribute("inventory"));
         IsDisabled = tree.GetBool("disabled");
         IsConnected = tree.GetBool("connected");
+        ChargeCount = tree.GetInt("chargeCount");
 
         base.FromTreeAttributes(tree, worldForResolving);
     }
@@ -376,6 +426,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         tree["inventory"] = invtree;
         tree.SetBool("disabled", IsDisabled);
         tree.SetBool("connected", IsConnected);
+        tree.SetInt("chargeCount", ChargeCount);
     }
 
     public void Disable()

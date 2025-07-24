@@ -4,7 +4,7 @@
   entityClass: "TemporalTransporter",
   behaviors: [
     {
-      name: "HorizontalOrientable"
+      name: "Chargeable"
     },
     {
       name: "Container"
@@ -19,14 +19,6 @@
       properties: {
         beamColorRGBA: "200,155,0,220"
       }
-    }
-  ],
-  variantgroups: [
-    {
-      code: "state",
-      states: [
-        "normal"
-      ]
     }
   ],
   drawtype: "json",

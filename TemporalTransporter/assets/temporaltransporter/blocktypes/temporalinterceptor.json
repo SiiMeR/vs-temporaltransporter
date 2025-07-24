@@ -4,6 +4,9 @@
   entityClass: "TemporalInterceptor",
   behaviors: [
     {
+      name: "Chargeable"
+    },
+    {
       name: "Container"
     }
   ],
@@ -19,14 +22,6 @@
       properties: {
         beamColorRGBA: "90,0,200,220"
       }
-    }
-  ],
-  variantgroups: [
-    {
-      code: "state",
-      states: [
-        "normal"
-      ]
     }
   ],
   drawtype: "json",

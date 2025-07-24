@@ -38,7 +38,7 @@ public class InterceptorDatabase
             api.World.SavegameIdentifier,
             modId);
 
-        var path = Path.Combine(databaseDirectory, "Interceptors.db");
+        var path = Path.Combine(databaseDirectory, DatabaseAccessor.DatabaseName);
         _connectionString = $"Data Source={path};";
 
         if (!Directory.Exists(databaseDirectory))

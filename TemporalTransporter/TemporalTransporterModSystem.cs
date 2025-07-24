@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using TemporalTransporter.Behaviors;
 using TemporalTransporter.Database;
 using TemporalTransporter.Entities;
@@ -7,7 +6,6 @@ using TemporalTransporter.Items;
 using TemporalTransporter.Messages;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
-using Vintagestory.API.MathTools;
 using Vintagestory.API.Server;
 
 namespace TemporalTransporter;
@@ -27,6 +25,7 @@ public class TemporalTransporterModSystem : ModSystem
         api.RegisterBlockEntityClass("TemporalInterceptor", typeof(BlockEntityTemporalInterceptor));
         api.RegisterBlockEntityBehaviorClass("Uncoverable", typeof(BlockEntityBehaviorUncoverable));
         api.RegisterBlockEntityBehaviorClass("Skybeam", typeof(BlockEntityBehaviorSkyBeam));
+        api.RegisterBlockBehaviorClass("Chargeable", typeof(BlockBehaviorChargeable));
 
         api.Network.RegisterChannel(Mod.Info.ModID)
             .RegisterMessageType<TransportersConnectedPacket>();
@@ -62,6 +61,7 @@ public class TemporalTransporterModSystem : ModSystem
         DatabaseAccessor.Transporter = new TransporterDatabase(api, Mod.Info.ModID);
         DatabaseAccessor.Interceptor = new InterceptorDatabase(api, Mod.Info.ModID);
         DatabaseAccessor.InventoryItem = new InventoryItemDatabase(api, Mod.Info.ModID);
+        DatabaseAccessor.Charge = new ChargeDatabase(api, Mod.Info.ModID);
 
         ServerNetworkChannel = api.Network.GetChannel(Mod.Info.ModID);
     }
