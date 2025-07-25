@@ -14,7 +14,6 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
     private readonly InventoryGeneric _inventory;
     private GuiDialogTemporalInterceptor? _dialog;
 
-
     public BlockEntityTemporalInterceptor(InventoryGeneric inventory)
     {
         _inventory = inventory;
@@ -165,7 +164,7 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
         if (api.Side == EnumAppSide.Server)
         {
             BlockEntitySharedLogic.UpdateInventory(api, Inventory, Pos.ToVec3i());
-
+            BlockEntitySharedLogic.SyncCharges(Pos.ToVec3i(), byPlayer);
             return true;
         }
 
@@ -204,5 +203,15 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
 
     public void Enable()
     {
+    }
+
+    public void UpdateChargeCount(int chargeCount)
+    {
+        ChargeCount = chargeCount;
+
+        if (Api.Side == EnumAppSide.Client)
+        {
+            _dialog?.UpdateChargeCount();
+        }
     }
 }

@@ -86,14 +86,14 @@ public class ChargeDatabase
     }
 
 
-    public void InitializeCharges(Vec3i coordinateKey)
+    public void InitializeCharges(Vec3i coords)
     {
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
         using var command = new SqliteCommand(InsertChargeQuery, connection);
 
-        command.Parameters.AddWithValue("@CoordinateKey", DatabaseAccessor.GetCoordinateKey(coordinateKey));
+        command.Parameters.AddWithValue("@CoordinateKey", DatabaseAccessor.GetCoordinateKey(coords));
 
         command.ExecuteScalar();
     }

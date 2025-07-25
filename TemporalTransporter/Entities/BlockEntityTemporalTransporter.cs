@@ -288,7 +288,8 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         {
             var interceptorPos = DatabaseAccessor.CoordinateKeyToVec3i(interceptor.CoordinateKey);
 
-            if (IsInterceptorCatchingBeam(senderPos, receiverPos, interceptorPos, 10f) && HasFreeSlot(interceptorPos) &&
+            if (BlockEntitySharedLogic.IsInterceptorCatchingBeam(senderPos, receiverPos, interceptorPos, 10f) &&
+                HasFreeSlot(interceptorPos) &&
                 HasCharge(interceptorPos))
             {
                 targetPosition = interceptor.CoordinateKey;
@@ -341,30 +342,6 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
                -1;
     }
 
-    public static bool IsInterceptorCatchingBeam(Vec3i senderPos, Vec3i receiverPos, Vec3i interceptorPos, float radius)
-    {
-        var sender = new Vector2(senderPos.X, senderPos.Z);
-        var receiver = new Vector2(receiverPos.X, receiverPos.Z);
-        var interceptor = new Vector2(interceptorPos.X, interceptorPos.Z);
-
-        var senderToReceiver = receiver - sender;
-        var lenSquared = senderToReceiver.LengthSquared();
-
-        float projection = 0;
-        if (lenSquared != 0)
-        {
-            projection = Vector2.Dot(interceptor - sender, senderToReceiver) / lenSquared;
-        }
-
-        // Clamp t between 0 and 1
-        projection = Math.Clamp(projection, 0, 1);
-
-        var closestPoint = sender + projection * senderToReceiver;
-
-        var distance = Vector2.Distance(interceptor, closestPoint);
-
-        return distance <= radius;
-    }
 
     public void MoveItemToPosition(ItemStack itemStack, string toCoordinateKey, int slotId)
     {
@@ -431,6 +408,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         if (api.Side == EnumAppSide.Server)
         {
             BlockEntitySharedLogic.UpdateInventory(api, Inventory, Pos.ToVec3i());
+            BlockEntitySharedLogic.SyncCharges(Pos.ToVec3i(), byPlayer);
 
             return true;
         }
@@ -498,5 +476,15 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
         IsDisabled = false;
         _dialog?.Redraw();
+    }
+
+    public void UpdateChargeCount(int chargeCount)
+    {
+        ChargeCount = chargeCount;
+
+        if (Api.Side == EnumAppSide.Client)
+        {
+            _dialog?.UpdateChargeCount();
+        }
     }
 }

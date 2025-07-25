@@ -8,5 +8,6 @@
   "temporaltransporter-key-text": "Key",
   "temporaltransporter-charge-text": "Charges",
   "temporaltransporter-output-text": "Received mail",
-  "charges-text": "Charges"
+  "charges-text": "Charges",
+  "charged-success": "Added 1 charge"
 }
