@@ -36,6 +36,8 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
     public override InventoryBase Inventory => _inventory;
     public override string InventoryClassName { get; } = "temporalinterceptorInv";
 
+    public bool IsDisabled { get; set; }
+
     public override void Initialize(ICoreAPI api)
     {
         _inventory.LateInitialize($"{InventoryClassName}-{Pos}", api);
@@ -63,6 +65,7 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
         {
             return;
         }
+
 
         var isDisabled = tree.GetBool("isDisabled");
         if (isDisabled)
@@ -154,13 +157,6 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
     {
         var api = byPlayer.Entity.World.Api;
 
-        AnimUtil?.StartAnimation(new AnimationMetaData
-        {
-            Animation = "active",
-            Code = "active",
-            AnimationSpeed = 1.0f
-        });
-
         if (api.Side == EnumAppSide.Server)
         {
             BlockEntitySharedLogic.UpdateInventory(api, Inventory, Pos.ToVec3i());
@@ -199,10 +195,40 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
 
     public void Disable()
     {
+        if (IsDisabled)
+        {
+            return;
+        }
+
+        Console.WriteLine("dis");
+
+        AnimUtil?.StopAnimation("active");
+
+        IsDisabled = true;
+        _dialog?.Redraw();
     }
 
     public void Enable()
     {
+        if (!IsDisabled)
+        {
+            return;
+        }
+
+
+        IsDisabled = false;
+
+        if (Api.Side == EnumAppSide.Client)
+        {
+            AnimUtil?.StartAnimation(new AnimationMetaData
+            {
+                Animation = "active",
+                Code = "active",
+                AnimationSpeed = 0.5f
+            });
+
+            _dialog?.Redraw();
+        }
     }
 
     public void UpdateChargeCount(int chargeCount)

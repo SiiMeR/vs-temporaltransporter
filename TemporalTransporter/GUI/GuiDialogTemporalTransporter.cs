@@ -1,6 +1,7 @@
 ﻿using System;
 using TemporalTransporter.Entities;
 using TemporalTransporter.Helpers;
+using TemporalTransporter.Messages;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
@@ -80,12 +81,12 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
                 CairoFont.WhiteSmallText().WithFontSize(14), inputTextBounds, "inputText")
             .AddItemSlotGrid(Inventory, SendInvPacket, 1, new[] { _blockEntity.InputSlotIndex }, inputSlotBounds,
                 "inputslot")
+            .AddStaticText(Util.LangStr("temporaltransporter-key-text"),
+                CairoFont.WhiteSmallText().WithFontSize(14), keyslotTextBounds, "keyslotText")
             .AddIf(_isConnected)
             .AddPassiveItemSlot(keySlotBounds, Inventory, _blockEntity.KeySlot)
             .EndIf()
             .AddIf(!_isConnected)
-            .AddStaticText(Util.LangStr("temporaltransporter-key-text"),
-                CairoFont.WhiteSmallText().WithFontSize(14), keyslotTextBounds, "keyslotText")
             .AddItemSlotGrid(Inventory, SendInvPacket, 1, new[] { _blockEntity.KeySlotIndex }, keySlotBounds, "keyslot")
             .EndIf()
             .AddButton("Send", OnSendClick, sendButtonBounds, CairoFont.SmallButtonText(), EnumButtonStyle.Normal,
@@ -132,7 +133,7 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
     public void UpdateSendButtonState()
     {
         SingleComposer.GetButton("sendButton").Enabled =
-            _blockEntity is { ChargeCount: > 0, KeySlot.Empty: false, InputSlot.Empty: false };
+            _blockEntity is { ChargeCount: > 0, KeySlot.Empty: false, InputSlot.Empty: false, IsDisabled: false };
     }
 
     private void OnItemSlotModified(int slotId)
@@ -162,18 +163,14 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
                 X = BlockEntityPosition.X,
                 Y = BlockEntityPosition.Y,
                 Z = BlockEntityPosition.Z,
-                Packetid = 1337,
+                Packetid = PacketIds.SendItemPacketId,
                 Data = Array.Empty<byte>()
             },
-            Id = 1337
+            Id = PacketIds.SendItemPacketId
         };
 
         capi.Network.SendBlockEntityPacket(BlockEntityPosition.X, BlockEntityPosition.Y,
             BlockEntityPosition.Z, packet);
-
-        _blockEntity.ChargeCount -= 1;
-        UpdateChargeCount();
-
 
         return true;
     }

@@ -10,7 +10,7 @@ namespace TemporalTransporter.GUI;
 public class GuiDialogTemporalInterceptor : GuiDialogBlockEntity
 {
     private readonly BlockEntityTemporalInterceptor _blockEntity;
-    private bool _isDisabled;
+    public bool IsDisabled;
 
     public GuiDialogTemporalInterceptor(InventoryBase inventory, BlockPos bePos, ICoreClientAPI capi,
         BlockEntityTemporalInterceptor blockEntity) :
@@ -44,7 +44,7 @@ public class GuiDialogTemporalInterceptor : GuiDialogBlockEntity
 
         var dialogBounds = ElementStdBounds.AutosizedMainDialog;
 
-        var receivedMailBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, 0, 70, 4, 1);
+        var receivedMailBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, 0, 100, 4, 1);
         var receivedMailBounds2 =
             ElementStdBounds.SlotGrid(EnumDialogArea.None, 0, receivedMailBounds.fixedY + 50, 4, 1);
 
@@ -56,17 +56,17 @@ public class GuiDialogTemporalInterceptor : GuiDialogBlockEntity
             .AddShadedDialogBG(bgBounds)
             .AddDialogTitleBar(DialogTitle, OnTitleBarClose)
             .BeginChildElements(bgBounds)
-            .AddIf(_isDisabled)
+            .AddIf(_blockEntity.IsDisabled)
             .AddStaticText("Disabled: Not visible from sky",
                 CairoFont.WhiteSmallText().WithFontSize(13).WithColor(new[] { 1d, 0d, 0d, 1d }),
-                ElementBounds.Fixed(0, 100, 180, 20))
+                ElementBounds.Fixed(2, 60, 180, 20))
             .EndIf()
             .AddStaticText($"{Util.LangStr("charges-text")}:", CairoFont.WhiteSmallText().WithFontSize(15),
                 chargesTextBounds,
                 "chargesText")
             .AddDynamicText(_blockEntity.ChargeCount.ToString(), CairoFont.WhiteSmallText().WithFontSize(15),
                 chargeCountBounds, "chargeCount")
-            .AddStaticText("Received Mail", CairoFont.WhiteSmallText(), ElementBounds.Fixed(2, 45, 200, 20),
+            .AddStaticText("Received Mail", CairoFont.WhiteSmallText(), ElementBounds.Fixed(2, 80, 200, 20),
                 "receivedMailTitle")
             .AddItemSlotGrid(Inventory, SendInvPacket, 4, new[] { 0, 1, 2, 3 }, receivedMailBounds,
                 "receivedMailBounds")
@@ -110,8 +110,9 @@ public class GuiDialogTemporalInterceptor : GuiDialogBlockEntity
         base.OnGuiOpened();
     }
 
-    public void SetIsDisabled(bool isDisabled)
+    public void Redraw()
     {
-        _isDisabled = isDisabled;
+        Console.WriteLine("redraw");
+        SetupDialog();
     }
 }

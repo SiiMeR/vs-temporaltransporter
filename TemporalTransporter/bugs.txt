@@ -2,3 +2,9 @@
 * config diameter
 * config to change ground height
 * shouldnt be usable below Y = ?
+
+
+* shift click key puts it into black hole
+* particles shoudl be more temporal gear colored
+* transporter should say on the ui that its blocked. can still send when blocked
+* there should be a cooldown on sending (10s)

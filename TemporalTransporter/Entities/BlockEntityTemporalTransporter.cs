@@ -19,6 +19,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 {
     private readonly InventoryGeneric _inventory;
     private GuiDialogTemporalTransporter? _dialog;
+    private WeatherSystemServer? _weatherSystem;
     public bool IsConnected;
     public bool IsDisabled;
 
@@ -61,13 +62,14 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
     public override string InventoryClassName { get; } = "temporaltransporterInv";
     public int ChargeCount { get; set; }
 
-    public static int SendItemPacketId => 1337;
-
     public override void Initialize(ICoreAPI api)
     {
         _inventory.LateInitialize($"{InventoryClassName}-{Pos}", api);
         _inventory.SlotModified += OnItemSlotModified;
         base.Initialize(api);
+
+        _weatherSystem = Api.ModLoader.GetModSystem<WeatherSystemServer>();
+
 
         api.Event.RegisterEventBusListener(OnChargeAdded, filterByEventName: Events.Charged);
         api.Event.RegisterEventBusListener(OnDisabledStateChanged, filterByEventName: Events.SetDisabledState);
@@ -205,14 +207,10 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         base.OnBlockPlaced(byItemStack);
     }
 
-    public override void OnReceivedServerPacket(int packetid, byte[] data)
-    {
-        base.OnReceivedServerPacket(packetid, data);
-    }
 
     public override void OnReceivedClientPacket(IPlayer player, int packetid, byte[] data)
     {
-        if (packetid == SendItemPacketId)
+        if (packetid == PacketIds.SendItemPacketId)
         {
             OnSendItem(player);
             return;
@@ -317,8 +315,15 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         DatabaseAccessor.Charge.DecrementCharge(Pos.ToVec3i());
         ChargeCount -= 1;
 
+        TemporalTransporterModSystem.ServerNetworkChannel?.SendPacket(new SyncChargesPacket
+        {
+            ChargeCount = ChargeCount,
+            CoordinateKey = DatabaseAccessor.GetCoordinateKey(Pos.ToVec3i())
+        }, player);
+
         if (targetIsInterceptor)
         {
+            _weatherSystem?.SpawnLightningFlash(DatabaseAccessor.CoordinateKeyToVec3d(targetPosition));
             DatabaseAccessor.Charge.DecrementCharge(DatabaseAccessor.CoordinateKeyToVec3i(targetPosition));
         }
 
@@ -327,8 +332,12 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
                 Pos.X, Pos.Y, Pos.Z,
                 null, true, 16f);
 
-        var weatherSys = Api.ModLoader.GetModSystem<WeatherSystemServer>();
-        weatherSys.SpawnLightningFlash(DatabaseAccessor.CoordinateKeyToVec3d(targetPosition));
+        var targetPositionVec3d = DatabaseAccessor.CoordinateKeyToVec3d(targetPosition);
+
+        Api.World
+            .PlaySoundAt(new AssetLocation("game:sounds/effect/translocate-breakdimension"),
+                targetPositionVec3d.X, targetPositionVec3d.Y, targetPositionVec3d.Z,
+                null, true, 16f);
     }
 
     private bool HasCharge(Vec3i interceptorPos)

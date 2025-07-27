@@ -2,7 +2,7 @@
   "block-temporaltransporter": "Temporal Transporter",
   "block-temporalinterceptor": "Temporal Interceptor",
   "item-transporterkey": "Temporal Key",
-  "error-temporaltransporter-destinationfull": "The destination temporal transporter is full!",
+  "error-temporaltransporter-destinationfull": "The destination temporal transporter/interceptor is full!",
   "blockhelp-chargeable": "Add charge",
   "temporaltransporter-input-text": "Input",
   "temporaltransporter-key-text": "Key",

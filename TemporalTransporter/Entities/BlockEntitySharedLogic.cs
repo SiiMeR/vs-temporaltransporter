@@ -11,8 +11,6 @@ namespace TemporalTransporter.Entities;
 
 public static class BlockEntitySharedLogic
 {
-    public static int SyncChargesPacketId = 1338;
-
     public static void UpdateInventory(ICoreAPI api, IInventory inventory, Vec3i atPos)
     {
         var inventoryItems =
