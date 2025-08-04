@@ -55,6 +55,7 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
         var inputSlotBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, 0, 40, 1, 1);
 
         var keyslotTextBounds = ElementBounds.Fixed(152, 21, 50, 20);
+        var keycodeTextBounds = ElementBounds.Fixed(152, 89, 50, 20);
 
         var keySlotBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None,
             150, 40, 1, 1);
@@ -72,6 +73,9 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
 
         var chargesTextBounds = ElementBounds.Fixed(2, 95, 80, 20);
         var chargeCountBounds = chargesTextBounds.RightCopy(-10);
+
+        var keyCode = _blockEntity.KeySlot.Itemstack?.Attributes.GetString("keycode");
+
         SingleComposer = capi.Gui
             .CreateCompo("temporaltransportergui", dialogBounds)
             .AddShadedDialogBG(bgBounds)
@@ -83,6 +87,8 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
                 "inputslot")
             .AddStaticText(Util.LangStr("temporaltransporter-key-text"),
                 CairoFont.WhiteSmallText().WithFontSize(14), keyslotTextBounds, "keyslotText")
+            .AddDynamicText(keyCode,
+                CairoFont.WhiteSmallText().WithFontSize(10), keycodeTextBounds, "keycodeText")
             .AddIf(_isConnected)
             .AddPassiveItemSlot(keySlotBounds, Inventory, _blockEntity.KeySlot)
             .EndIf()
@@ -143,14 +149,30 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
             return;
         }
 
-        if (slotId != _blockEntity.InputSlotIndex)
+
+        var itemStack = Inventory[slotId]?.Itemstack;
+
+        if (slotId == _blockEntity.InputSlotIndex)
         {
-            return;
+            if (itemStack == null)
+            {
+                return;
+            }
+
+            SingleComposer.GetButton("sendButton").Enabled = _blockEntity.ChargeCount > 0;
         }
+        else if (slotId == _blockEntity.KeySlotIndex)
+        {
+            if (itemStack == null)
+            {
+                SingleComposer.GetDynamicText("keycodeText").SetNewText(string.Empty);
 
-        var itemStack = Inventory[slotId].Itemstack;
+                return;
+            }
 
-        SingleComposer.GetButton("sendButton").Enabled = itemStack != null && _blockEntity.ChargeCount > 0;
+            var keyCode = itemStack.ItemAttributes["keycode"].AsString();
+            SingleComposer.GetDynamicText("keycodeText").SetNewText(keyCode ?? string.Empty);
+        }
     }
 
 
