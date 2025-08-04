@@ -61,15 +61,7 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
             return;
         }
 
-        var isDisabled = tree.GetBool("isDisabled");
-        if (isDisabled)
-        {
-            _isDisabled = true;
-        }
-        else
-        {
-            _isDisabled = false;
-        }
+        _isDisabled = tree.GetBool("isDisabled");
     }
 
 
@@ -122,5 +114,17 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
         _beam.AddPos.Set(minPosX, 2, minPosZ);
 
         Api.World.SpawnParticles(_beam);
+    }
+
+    public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
+    {
+        _isDisabled = tree.GetBool("isDisabled");
+        base.FromTreeAttributes(tree, worldAccessForResolve);
+    }
+
+    public override void ToTreeAttributes(ITreeAttribute tree)
+    {
+        base.ToTreeAttributes(tree);
+        tree.SetBool("isDisabled", _isDisabled);
     }
 }

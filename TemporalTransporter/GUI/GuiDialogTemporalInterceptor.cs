@@ -112,7 +112,8 @@ public class GuiDialogTemporalInterceptor : GuiDialogBlockEntity
 
     public void Redraw()
     {
-        Console.WriteLine("redraw");
+        TryClose();
         SetupDialog();
+        TryOpen();
     }
 }
