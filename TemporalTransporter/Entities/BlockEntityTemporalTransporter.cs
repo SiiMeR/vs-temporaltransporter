@@ -23,6 +23,8 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
     public bool IsConnected;
     public bool IsDisabled;
 
+    public bool IsOnCooldown;
+
     public BlockEntityTemporalTransporter(InventoryGeneric inventory)
     {
         _inventory = inventory;
@@ -116,7 +118,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
         if (Api.Side == EnumAppSide.Server)
         {
-            DatabaseAccessor.Charge.IncrementCharge(pos);
+            ChargeCount = DatabaseAccessor.Charge.IncrementCharge(pos);
         }
 
         _dialog?.UpdateChargeCount();
@@ -232,7 +234,13 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
             return;
         }
 
-        if (Api.Side != EnumAppSide.Server || InputSlot.Itemstack == null)
+
+        if (InputSlot.Itemstack == null)
+        {
+            return;
+        }
+
+        if (Api is not ICoreServerAPI serverApi)
         {
             return;
         }
@@ -241,6 +249,16 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         {
             return;
         }
+
+
+        if (IsOnCooldown)
+        {
+            player.SendIngameError("ttrans-cooldown",
+                Util.LangStr("error-temporaltransporter-oncooldown"));
+
+            return;
+        }
+
 
         var connectionKey = KeySlot.Itemstack?.Attributes?.GetString("keycode");
         if (string.IsNullOrWhiteSpace(connectionKey))
@@ -282,11 +300,15 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
         var targetPosition = toPosition;
         var targetIsInterceptor = false;
+
+        var interceptorRadius = TemporalTransporterModSystem.Config?.InterceptorRadius ?? 10;
+
         foreach (var interceptor in interceptors)
         {
             var interceptorPos = DatabaseAccessor.CoordinateKeyToVec3i(interceptor.CoordinateKey);
 
-            if (BlockEntitySharedLogic.IsInterceptorCatchingBeam(senderPos, receiverPos, interceptorPos, 10f) &&
+            if (BlockEntitySharedLogic.IsInterceptorCatchingBeam(senderPos, receiverPos, interceptorPos,
+                    interceptorRadius) &&
                 HasFreeSlot(interceptorPos) &&
                 HasCharge(interceptorPos))
             {
@@ -311,9 +333,15 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         _inventory.MarkSlotDirty(InputSlotIndex);
 
 
+        IsOnCooldown = true;
+        serverApi.Event.RegisterCallback(dt => { IsOnCooldown = false; },
+            TemporalTransporterModSystem.Config?.SendCooldownSeconds * 1000 ?? 1000);
+
+
         // TODO: These 3 should be tied together into an atomic operation (perhaps having db be the sot)
-        DatabaseAccessor.Charge.DecrementCharge(Pos.ToVec3i());
-        ChargeCount -= 1;
+        var newChargeCount = DatabaseAccessor.Charge.DecrementCharge(Pos.ToVec3i());
+        ChargeCount = newChargeCount;
+
 
         TemporalTransporterModSystem.ServerNetworkChannel?.SendPacket(new SyncChargesPacket
         {

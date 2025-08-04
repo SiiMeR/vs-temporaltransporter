@@ -202,8 +202,6 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
 
     public void Redraw()
     {
-        TryClose();
         SetupDialog();
-        TryOpen();
     }
 }

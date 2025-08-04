@@ -95,7 +95,7 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
 
         if (Api.Side == EnumAppSide.Server)
         {
-            DatabaseAccessor.Charge.IncrementCharge(pos);
+            ChargeCount = DatabaseAccessor.Charge.IncrementCharge(pos);
         }
 
         _dialog?.UpdateChargeCount();
@@ -199,8 +199,6 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
         {
             return;
         }
-
-        Console.WriteLine("dis");
 
         AnimUtil?.StopAnimation("active");
 

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Microsoft.Data.Sqlite;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -22,10 +23,10 @@ public class ChargeDatabase
         "VALUES(@CoordinateKey, 0)";
 
     private const string IncrementChargeQuery =
-        "UPDATE Charges SET ChargeCount = ChargeCount + 1 WHERE CoordinateKey = @CoordinateKey;";
+        "UPDATE Charges SET ChargeCount = ChargeCount + 1 WHERE CoordinateKey = @CoordinateKey RETURNING ChargeCount;";
 
     private const string DecrementChargeQuery =
-        "UPDATE Charges SET ChargeCount = ChargeCount - 1 WHERE CoordinateKey = @CoordinateKey;";
+        "UPDATE Charges SET ChargeCount = ChargeCount - 1 WHERE CoordinateKey = @CoordinateKey RETURNING ChargeCount;";
 
     private const string GetChargeQuery =
         "SELECT * FROM Charges WHERE CoordinateKey = @CoordinateKey;";
@@ -61,7 +62,7 @@ public class ChargeDatabase
         return connection;
     }
 
-    public void IncrementCharge(Vec3i coords)
+    public int IncrementCharge(Vec3i coords)
     {
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
@@ -70,19 +71,18 @@ public class ChargeDatabase
 
         command.Parameters.AddWithValue("@CoordinateKey", DatabaseAccessor.GetCoordinateKey(coords));
 
-        command.ExecuteNonQuery();
+        return Convert.ToInt32(command.ExecuteScalar());
     }
 
-    public void DecrementCharge(Vec3i coords)
+    public int DecrementCharge(Vec3i coords)
     {
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
         using var command = new SqliteCommand(DecrementChargeQuery, connection);
-
         command.Parameters.AddWithValue("@CoordinateKey", DatabaseAccessor.GetCoordinateKey(coords));
 
-        command.ExecuteNonQuery();
+        return Convert.ToInt32(command.ExecuteScalar());
     }
 
 

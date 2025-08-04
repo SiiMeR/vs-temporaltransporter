@@ -19,6 +19,8 @@ public class TemporalTransporterModSystem : ModSystem
     public static IServerNetworkChannel? ServerNetworkChannel;
     public static IClientNetworkChannel? ClientNetworkChannel;
 
+    public static TemporalTransporterConfig? Config;
+
     public override void Start(ICoreAPI api)
     {
         api.RegisterItemClass("ItemTransporterKey", typeof(ItemTransporterKey));
@@ -53,6 +55,7 @@ public class TemporalTransporterModSystem : ModSystem
         var blockPos = new BlockPos(coords.X, coords.Y, coords.Z);
         var blockEntity = ClientApi.World.BlockAccessor.GetBlockEntity(blockPos);
 
+
         if (blockEntity is BlockEntityTemporalInterceptor blockEntityInterceptor)
         {
             blockEntityInterceptor.UpdateChargeCount(packet.ChargeCount);
@@ -85,11 +88,31 @@ public class TemporalTransporterModSystem : ModSystem
     public override void StartServerSide(ICoreServerAPI api)
     {
         ServerApi = api;
+
+        Config = LoadConfig<TemporalTransporterConfig>(api);
+
         DatabaseAccessor.Transporter = new TransporterDatabase(api, Mod.Info.ModID);
         DatabaseAccessor.Interceptor = new InterceptorDatabase(api, Mod.Info.ModID);
         DatabaseAccessor.InventoryItem = new InventoryItemDatabase(api, Mod.Info.ModID);
         DatabaseAccessor.Charge = new ChargeDatabase(api, Mod.Info.ModID);
 
         ServerNetworkChannel = api.Network.GetChannel(Mod.Info.ModID);
+    }
+
+    public TConfig LoadConfig<TConfig>(ICoreServerAPI api, string? configName = null) where TConfig : new()
+    {
+        configName ??= $"{Mod.Info.ModID}.config.json";
+
+        var config = api.LoadModConfig<TConfig>(configName);
+        if (config == null)
+        {
+            config = new TConfig();
+            api.StoreModConfig(config, configName);
+        }
+
+        // in case of new fields
+        api.StoreModConfig(config, configName);
+
+        return config;
     }
 }

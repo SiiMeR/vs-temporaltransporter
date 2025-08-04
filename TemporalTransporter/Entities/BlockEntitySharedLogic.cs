@@ -56,7 +56,7 @@ public static class BlockEntitySharedLogic
         }
     }
 
-    public static bool IsInterceptorCatchingBeam(Vec3i senderPos, Vec3i receiverPos, Vec3i interceptorPos, float radius)
+    public static bool IsInterceptorCatchingBeam(Vec3i senderPos, Vec3i receiverPos, Vec3i interceptorPos, int radius)
     {
         var sender = new Vector2(senderPos.X, senderPos.Z);
         var receiver = new Vector2(receiverPos.X, receiverPos.Z);

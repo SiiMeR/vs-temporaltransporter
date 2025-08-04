@@ -6,6 +6,7 @@
   "item-transporterkey": "Temporal Key",
   "itemdesc-transporterkey": "<font color=\"#99c9f9\"><i>One half of a forged pair. The key looks like it could be inserted into a piece of machinery long lost to time.</i></font>",
   "error-temporaltransporter-destinationfull": "The destination temporal transporter is full!",
+  "error-temporaltransporter-oncooldown": "You need to wait before sending another message!",
   "blockhelp-chargeable": "Add charge",
   "temporaltransporter-input-text": "Input",
   "temporaltransporter-key-text": "Key",
