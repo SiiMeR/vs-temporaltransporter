@@ -17,7 +17,7 @@
     {
       name: "Skybeam",
       properties: {
-        beamColorRGBA: "200,155,0,220"
+        beamColorRGBA: "157,203,43,220"
       }
     }
   ],
@@ -57,6 +57,14 @@
   heldTpIdleAnimation: "holdbothhandslarge",
   heldRightReadyAnimation: "heldblockready",
   heldTpUseAnimation: "twohandplaceblock",
+  guiTransform: {
+    translation: {
+      x: 0,
+      y: 6,
+      z: 0
+    },
+    scale: 0.71
+  },
   tpHandTransform: {
     translation: {
       x: -1.23,

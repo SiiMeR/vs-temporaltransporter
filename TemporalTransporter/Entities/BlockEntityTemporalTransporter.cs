@@ -404,8 +404,8 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
     public override void OnBlockBroken(IPlayer byPlayer = null)
     {
-        // Inventory[1].TakeOut(1);
-        // Inventory.MarkSlotDirty(1);
+        KeySlot.TakeOut(1);
+        Inventory.MarkSlotDirty(KeySlotIndex);
 
         base.OnBlockBroken(byPlayer);
     }

@@ -23,8 +23,15 @@ public class ItemTransporterKey : Item
 
     public override string GetHeldItemName(ItemStack itemStack)
     {
-        var keyCode = itemStack.Attributes.GetString("keycode", "Unknown");
+        var keyCode = itemStack.Attributes.GetString("keycode");
+        if (string.IsNullOrEmpty(keyCode))
+        {
+            return $"{base.GetHeldItemName(itemStack)}";
+        }
 
-        return $"{base.GetHeldItemName(itemStack)} ({keyCode})";
+        var coloredKeyCode = $"<font color=\"#2bcb9d\">{keyCode}</font>";
+
+
+        return $"{base.GetHeldItemName(itemStack)} – {coloredKeyCode}";
     }
 }

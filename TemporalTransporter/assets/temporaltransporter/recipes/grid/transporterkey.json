@@ -1,12 +1,18 @@
 {
-  ingredientPattern: "P",
+  ingredientPattern: "GH",
   ingredients: {
-    "P": {
+    "G": {
       type: "item",
-      code: "game:stone-granite"
+      code: "game:gear-temporal"
+    },
+    "H": {
+      type: "item",
+      code: "game:hammer-*",
+      isTool: true,
+      toolDurabilityCost: 30
     }
   },
-  width: 1,
+  width: 2,
   height: 1,
   shapeless: true,
   output: {

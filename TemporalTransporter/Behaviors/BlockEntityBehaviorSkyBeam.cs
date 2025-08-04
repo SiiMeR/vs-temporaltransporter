@@ -13,6 +13,8 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
     private SimpleParticleProperties _beam;
 
     private int _colorRgba = ColorUtil.ColorFromRgba(0, 0, 0, 255);
+
+    private bool _isDisabled;
     private long _listenerId;
 
     public BlockEntityBehaviorSkyBeam(BlockEntity blockentity) : base(blockentity)
@@ -28,7 +30,7 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
                 2, 5,
                 _colorRgba,
                 new Vec3d(), new Vec3d(),
-                new Vec3f(0, 0.5f, 0), new Vec3f(0, 1f, 0),
+                new Vec3f(0, 0.4f, 0), new Vec3f(0, 0.9f, 0),
                 1f, 0f, 0.08f, 0.18f,
                 EnumParticleModel.Quad
             )
@@ -40,7 +42,34 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
             _listenerId = api.Event.RegisterGameTickListener(OnGameTick, 50);
         }
 
+        api.Event.RegisterEventBusListener(OnDisabledStateChanged, filterByEventName: Events.SetDisabledState);
+
+
         base.Initialize(api, properties);
+    }
+
+    private void OnDisabledStateChanged(string eventName, ref EnumHandling handling, IAttribute data)
+    {
+        if (data is not ITreeAttribute tree)
+        {
+            return;
+        }
+
+        var pos = tree.GetVec3i("position");
+        if (Pos.ToVec3i() != pos)
+        {
+            return;
+        }
+
+        var isDisabled = tree.GetBool("isDisabled");
+        if (isDisabled)
+        {
+            _isDisabled = true;
+        }
+        else
+        {
+            _isDisabled = false;
+        }
     }
 
 
@@ -69,19 +98,7 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
 
     public void OnGameTick(float dt)
     {
-        var rainmapHeight = Api.World.BlockAccessor.GetRainMapHeightAt(Pos);
-
-        // something covering it
-        // TODO: use the disabled prop
-        if (rainmapHeight > Pos.Y)
-        {
-            return;
-        }
-
-
-        var api = TemporalTransporterModSystem.ClientApi;
-
-        if (api is not { Side: EnumAppSide.Client })
+        if (_isDisabled)
         {
             return;
         }
@@ -102,7 +119,7 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
         var minPosZ = Random.Shared.NextDouble() * multiplier * 2 - multiplier;
 
         _beam.MinPos.Set(Pos.X + 0.5, Pos.Y + 0.6, Pos.Z + 0.5);
-        _beam.AddPos.Set(minPosX, 3, minPosZ);
+        _beam.AddPos.Set(minPosX, 2, minPosZ);
 
         Api.World.SpawnParticles(_beam);
     }

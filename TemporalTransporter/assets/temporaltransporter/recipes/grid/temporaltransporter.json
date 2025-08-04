@@ -1,0 +1,48 @@
+{
+  ingredientPattern: "RGR,HJC,TMT",
+  ingredients: {
+    "G": {
+      type: "block",
+      code: "game:glassslab-plain-*",
+      quantity: 3
+    },
+    "R": {
+      type: "item",
+      code: "game:rod-cupronickel",
+      quantity: 2
+    },
+    "T": {
+      type: "item",
+      code: "game:gear-temporal"
+    },
+    "H": {
+      type: "item",
+      code: "game:hammer-*",
+      isTool: true,
+      toolDurabilityCost: 50
+    },
+    "J": {
+      type: "item",
+      code: "game:jonasframes-*"
+    },
+    "M": {
+      type: "block",
+      code: "game:metal-parts",
+      quantity: 10
+    },
+    "C": {
+      type: "item",
+      code: "game:chisel-*",
+      isTool: true,
+      toolDurabilityCost: 50
+    }
+  },
+  width: 3,
+  height: 3,
+  shapeless: false,
+  output: {
+    type: "block",
+    code: "temporaltransporter",
+    quantity: 1
+  }
+}
