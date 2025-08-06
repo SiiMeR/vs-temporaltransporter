@@ -2,29 +2,36 @@
   "code": "transporterkey",
   "class": "ItemTransporterKey",
   "maxstacksize": 2,
-  "creativeinventoryStacks": [
-    {
-      "tabs": [
-        "general",
-        "temporaltransporter"
-      ],
-      "stacks": [
-        {
-          "type": "item",
-          "code": "temporaltransporter:transporterkey",
-          "attributes": {
-            keycode: "TEST"
-          },
-          "quantity": 2
-        }
-      ]
-    }
-  ],
+  creativeinventory: {
+    "general": [
+      "*"
+    ],
+    "temporaltransporter": [
+      "*"
+    ]
+  },
+  //  "creativeinventoryStacks": [
+  //    {
+  //      "tabs": [
+  //        "general",
+  //        "temporaltransporter"
+  //      ]
+  //      //      "stacks": [
+  //      //        {
+  //      //          "type": "item",
+  //      //          "code": "temporaltransporter:transporterkey",
+  //      //          "attributes": {
+  //      //            keycode: "TEST"
+  //      //          },
+  //      //          "quantity": 2
+  //      //        }
+  //      //      ]
+  //    }
+  //  ],
   "shape": {
     "base": "game:item/gear-temporal"
   },
   "attributes": {
-    keycode: "TEST",
     displaycaseable: true,
     shelvable: true,
     groundStorageTransform: {

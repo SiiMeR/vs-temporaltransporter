@@ -38,17 +38,26 @@
     {
       type: "item",
       code: "game:gear-temporal",
-      quantity: 1
+      quantity: {
+        "avg": 1,
+        "var": 0
+      }
     },
     {
       type: "item",
       code: "game:rod-cupronickel",
-      quantity: 1
+      quantity: {
+        "avg": 1,
+        "var": 0
+      }
     },
     {
       type: "block",
       code: "game:metal-parts",
-      quantity: 5
+      quantity: {
+        "avg": 5,
+        "var": 0
+      }
     }
   ],
   shape: {
