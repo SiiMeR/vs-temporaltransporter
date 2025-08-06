@@ -1,43 +1,91 @@
-{
-  ingredientPattern: "GGG,HJC,TMT",
-  ingredients: {
-    "G": {
+[
+  {
+    ingredientPattern: "GGG,HJC,TMT",
+    requiresTrait: "improviser",
+    ingredients: {
+      "G": {
+        type: "block",
+        code: "game:glassslab-plain-*",
+        quantity: 2
+      },
+      "T": {
+        type: "item",
+        code: "game:gear-temporal"
+      },
+      "H": {
+        type: "item",
+        code: "game:hammer-*",
+        isTool: true,
+        toolDurabilityCost: 50
+      },
+      "J": {
+        type: "item",
+        code: "game:jonasparts-*"
+      },
+      "M": {
+        type: "block",
+        code: "game:metal-parts",
+        quantity: 5
+      },
+      "C": {
+        type: "item",
+        code: "game:chisel-*",
+        isTool: true,
+        toolDurabilityCost: 50
+      }
+    },
+    width: 3,
+    height: 3,
+    shapeless: false,
+    output: {
       type: "block",
-      code: "game:glassslab-plain-*",
-      quantity: 2
-    },
-    "T": {
-      type: "item",
-      code: "game:gear-temporal"
-    },
-    "H": {
-      type: "item",
-      code: "game:hammer-*",
-      isTool: true,
-      toolDurabilityCost: 50
-    },
-    "J": {
-      type: "item",
-      code: "game:jonasparts-*"
-    },
-    "M": {
-      type: "block",
-      code: "game:metal-parts",
-      quantity: 5
-    },
-    "C": {
-      type: "item",
-      code: "game:chisel-*",
-      isTool: true,
-      toolDurabilityCost: 50
+      code: "temporalinterceptor",
+      quantity: 1
     }
   },
-  width: 3,
-  height: 3,
-  shapeless: false,
-  output: {
-    type: "block",
-    code: "temporalinterceptor",
-    quantity: 1
+  {
+    ingredientPattern: "GGG,HJC,TMT",
+    ingredients: {
+      "G": {
+        type: "block",
+        code: "game:glassslab-plain-*",
+        quantity: 3
+      },
+      "T": {
+        type: "item",
+        code: "game:gear-temporal"
+      },
+      "H": {
+        type: "item",
+        code: "game:hammer-*",
+        isTool: true,
+        toolDurabilityCost: 200
+      },
+      "J": {
+        type: "item",
+        code: "game:jonasparts-*",
+        quantity: 4
+      },
+      "M": {
+        type: "block",
+        code: "game:metal-parts",
+        quantity: 16
+      },
+      "C": {
+        type: "item",
+        code: "game:chisel-*",
+        isTool: true,
+        toolDurabilityCost: 200
+      }
+    },
+    recipeGroup: 1,
+    width: 3,
+    height: 3,
+    shapeless: false,
+    output: {
+      type: "block",
+      code: "temporalinterceptor",
+      quantity: 1
+    }
   }
-}
+]

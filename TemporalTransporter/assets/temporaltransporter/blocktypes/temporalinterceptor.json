@@ -59,7 +59,7 @@
     base: "temporalinterceptor",
     rotateY: 0
   },
-  resistance: 30,
+  resistance: 20,
   sideopaque: {
     all: false
   },

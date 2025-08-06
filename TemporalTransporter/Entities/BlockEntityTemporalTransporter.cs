@@ -357,15 +357,13 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
         Api.World
             .PlaySoundAt(new AssetLocation("game:sounds/effect/translocate-breakdimension"),
-                Pos.X, Pos.Y, Pos.Z,
-                null, true, 16f);
+                Pos.X, Pos.Y, Pos.Z);
 
         var targetPositionVec3d = DatabaseAccessor.CoordinateKeyToVec3d(targetPosition);
 
         Api.World
             .PlaySoundAt(new AssetLocation("game:sounds/effect/translocate-breakdimension"),
-                targetPositionVec3d.X, targetPositionVec3d.Y, targetPositionVec3d.Z,
-                null, true, 16f);
+                targetPositionVec3d.X, targetPositionVec3d.Y, targetPositionVec3d.Z);
     }
 
     private bool HasCharge(Vec3i interceptorPos)

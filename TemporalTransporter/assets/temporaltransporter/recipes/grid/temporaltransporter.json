@@ -1,48 +1,100 @@
-{
-  ingredientPattern: "RGR,HJC,TMT",
-  ingredients: {
-    "G": {
+[
+  {
+    ingredientPattern: "RGR,HJC,TMT",
+    requiresTrait: "tinkerer",
+    ingredients: {
+      "G": {
+        type: "block",
+        code: "game:glassslab-plain-*",
+        quantity: 3
+      },
+      "R": {
+        type: "item",
+        code: "game:rod-cupronickel",
+        quantity: 2
+      },
+      "T": {
+        type: "item",
+        code: "game:gear-temporal"
+      },
+      "H": {
+        type: "item",
+        code: "game:hammer-*",
+        isTool: true,
+        toolDurabilityCost: 50
+      },
+      "J": {
+        type: "item",
+        code: "game:jonasframes-*"
+      },
+      "M": {
+        type: "block",
+        code: "game:metal-parts",
+        quantity: 10
+      },
+      "C": {
+        type: "item",
+        code: "game:chisel-*",
+        isTool: true,
+        toolDurabilityCost: 50
+      }
+    },
+    width: 3,
+    height: 3,
+    shapeless: false,
+    output: {
       type: "block",
-      code: "game:glassslab-plain-*",
-      quantity: 3
-    },
-    "R": {
-      type: "item",
-      code: "game:rod-cupronickel",
-      quantity: 2
-    },
-    "T": {
-      type: "item",
-      code: "game:gear-temporal"
-    },
-    "H": {
-      type: "item",
-      code: "game:hammer-*",
-      isTool: true,
-      toolDurabilityCost: 50
-    },
-    "J": {
-      type: "item",
-      code: "game:jonasframes-*"
-    },
-    "M": {
-      type: "block",
-      code: "game:metal-parts",
-      quantity: 10
-    },
-    "C": {
-      type: "item",
-      code: "game:chisel-*",
-      isTool: true,
-      toolDurabilityCost: 50
+      code: "temporaltransporter",
+      quantity: 1
     }
   },
-  width: 3,
-  height: 3,
-  shapeless: false,
-  output: {
-    type: "block",
-    code: "temporaltransporter",
-    quantity: 1
+  {
+    ingredientPattern: "RGR,HJC,TMT",
+    ingredients: {
+      "G": {
+        type: "block",
+        code: "game:glassslab-plain-*",
+        quantity: 12
+      },
+      "R": {
+        type: "item",
+        code: "game:rod-cupronickel",
+        quantity: 12
+      },
+      "T": {
+        type: "item",
+        code: "game:gear-temporal"
+      },
+      "H": {
+        type: "item",
+        code: "game:hammer-*",
+        isTool: true,
+        toolDurabilityCost: 200
+      },
+      "J": {
+        type: "item",
+        code: "game:jonasframes-*",
+        quantity: 4
+      },
+      "M": {
+        type: "block",
+        code: "game:metal-parts",
+        quantity: 16
+      },
+      "C": {
+        type: "item",
+        code: "game:chisel-*",
+        isTool: true,
+        toolDurabilityCost: 200
+      }
+    },
+    width: 3,
+    height: 3,
+    recipeGroup: 1,
+    output: {
+      type: "block",
+      code: "temporaltransporter",
+      quantity: 1
+    }
   }
-}
+]

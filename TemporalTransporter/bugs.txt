@@ -4,3 +4,13 @@
 
 * bugged temporal key shows in handbook
 * key isnt broadcast properly to other clients
+
+
+* the key looks like a temporal gear, should change that
+* the inventory should have a gear slot placeholder
+
+* interceptor still intercepts if covered
+* transport still intercepts if covered
+* charges dont go down for viewing clients
+* sound should be farther
+* malefactor and clockmakers will have a cheap recipe for the interceptor and transporter / not overlapping
