@@ -27,7 +27,7 @@ public class BlockBehaviorChargeable : BlockBehavior
             return base.OnBlockInteractStart(world, byPlayer, blockSel, ref handling);
         }
 
-        if (byPlayer.InventoryManager.ActiveHotbarSlot.Itemstack?.Collectible is not ItemRustyGear)
+        if (byPlayer.InventoryManager.ActiveHotbarSlot.Itemstack?.Collectible is not ItemTemporalGear)
         {
             return base.OnBlockInteractStart(world, byPlayer, blockSel, ref handling);
         }
@@ -59,7 +59,7 @@ public class BlockBehaviorChargeable : BlockBehavior
             new WorldInteraction
             {
                 ActionLangCode = "temporaltransporter:blockhelp-chargeable",
-                Itemstacks = new[] { new ItemStack(world.GetItem(new AssetLocation("game:gear-rusty"))) },
+                Itemstacks = new[] { new ItemStack(world.GetItem(new AssetLocation("game:gear-temporal"))) },
                 MouseButton = EnumMouseButton.Right,
                 HotKeyCode = "ctrl"
             }

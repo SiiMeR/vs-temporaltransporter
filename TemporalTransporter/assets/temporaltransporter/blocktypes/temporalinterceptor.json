@@ -37,6 +37,18 @@
       "*"
     ]
   },
+  drops: [
+    {
+      type: "item",
+      code: "game:gear-temporal",
+      quantity: 1
+    },
+    {
+      type: "block",
+      code: "game:metal-parts",
+      quantity: 2
+    }
+  ],
   shape: {
     base: "temporalinterceptor",
     rotateY: 0
@@ -56,7 +68,6 @@
     "walk": "game:walk/wood",
     "ambient": "game:effect/translocate-idle"
   },
-  drops: [],
   heldTpIdleAnimation: "holdbothhandslarge",
   heldRightReadyAnimation: "heldblockready",
   heldTpUseAnimation: "twohandplaceblock",

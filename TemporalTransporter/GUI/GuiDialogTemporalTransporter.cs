@@ -55,7 +55,6 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
         var inputSlotBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, 0, 40, 1, 1);
 
         var keyslotTextBounds = ElementBounds.Fixed(152, 21, 50, 20);
-        var keycodeTextBounds = ElementBounds.Fixed(152, 89, 50, 20);
 
         var keySlotBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None,
             150, 40, 1, 1);
@@ -75,7 +74,7 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
         var chargeCountBounds = chargesTextBounds.RightCopy(-10);
 
         var keyCode = _blockEntity.KeySlot.Itemstack?.Attributes.GetString("keycode");
-
+        var keycodeTextBounds = ElementBounds.Fixed(147, 95, 65, 20);
         SingleComposer = capi.Gui
             .CreateCompo("temporaltransportergui", dialogBounds)
             .AddShadedDialogBG(bgBounds)
@@ -88,12 +87,13 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
             .AddStaticText(Util.LangStr("temporaltransporter-key-text"),
                 CairoFont.WhiteSmallText().WithFontSize(14), keyslotTextBounds, "keyslotText")
             .AddDynamicText(keyCode,
-                CairoFont.WhiteSmallText().WithFontSize(10), keycodeTextBounds, "keycodeText")
+                CairoFont.WhiteSmallText().WithFontSize(11), keycodeTextBounds, "keycodeText")
             .AddIf(_isConnected)
             .AddPassiveItemSlot(keySlotBounds, Inventory, _blockEntity.KeySlot)
             .EndIf()
             .AddIf(!_isConnected)
-            .AddItemSlotGrid(Inventory, SendInvPacket, 1, new[] { _blockEntity.KeySlotIndex }, keySlotBounds, "keyslot")
+            .AddItemSlotGrid(Inventory, SendInvPacket, 1, new[] { _blockEntity.KeySlotIndex }, keySlotBounds,
+                "keyslot")
             .EndIf()
             .AddButton("Send", OnSendClick, sendButtonBounds, CairoFont.SmallButtonText(), EnumButtonStyle.Normal,
                 "sendButton")

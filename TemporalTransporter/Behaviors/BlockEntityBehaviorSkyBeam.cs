@@ -23,18 +23,22 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
 
     public override void Initialize(ICoreAPI api, JsonObject properties)
     {
+        // TODO use hsv
         var colorRgba = properties["beamColorRGBA"].AsString().Split(",").Select(c => Convert.ToInt32(c)).ToArray();
         _colorRgba = ColorUtil.ColorFromRgba(colorRgba[0], colorRgba[1], colorRgba[2], colorRgba[3]);
 
-        _beam = new SimpleParticleProperties(
-                2, 5,
-                _colorRgba,
-                new Vec3d(), new Vec3d(),
-                new Vec3f(0, 0.4f, 0), new Vec3f(0, 0.9f, 0),
-                1f, 0f, 0.08f, 0.18f,
-                EnumParticleModel.Quad
-            )
-            { SelfPropelled = true, VertexFlags = 255 };
+        _beam = new SimpleParticleProperties(1f, 1f, ColorUtil.ToRgba(50, 220, 220, 220), new Vec3d(),
+            new Vec3d(), new Vec3f(-0.1f, -0.1f, -0.1f), new Vec3f(0.1f, 1.5f, 0.1f), 2.5f, 0.0f)
+        {
+            MinSize = 0.2f,
+            MinPos = new Vec3d(Pos.X + 0.5, Pos.Y + 1, Pos.Z + 0.5),
+            SizeEvolve = EvolvingNatFloat.create(EnumTransformFunction.QUADRATIC, -0.6f),
+            MinQuantity = 0.5f,
+            VertexFlags = 255,
+            SelfPropelled = true,
+            ParticleModel = EnumParticleModel.Quad,
+            OpacityEvolve = EvolvingNatFloat.create(EnumTransformFunction.LINEAR, -150f)
+        };
 
 
         if (api is { Side: EnumAppSide.Client })
@@ -95,23 +99,20 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
             return;
         }
 
+        var h = 110 + Api.World.Rand.Next(15);
+        var v = 100 + Api.World.Rand.Next(50);
 
-        _accum += dt;
-        if (_accum < 0.15f)
-        {
-            return;
-        }
+        var color = Block.EntityClass == "TemporalTransporter"
+            ? ColorUtil.HsvToRgba(h, 180, v, 150)
+            : ColorUtil.HsvToRgba(h + 120, 180, v, 150);
 
-        _accum = 0;
-
+        _beam.Color = ColorUtil.ReverseColorBytes(color);
 
         var multiplier = 0.8f;
 
         var minPosX = Random.Shared.NextDouble() * multiplier * 2 - multiplier;
         var minPosZ = Random.Shared.NextDouble() * multiplier * 2 - multiplier;
-
-        _beam.MinPos.Set(Pos.X + 0.5, Pos.Y + 0.6, Pos.Z + 0.5);
-        _beam.AddPos.Set(minPosX, 2, minPosZ);
+        _beam.AddPos.Set(minPosX, 1, minPosZ);
 
         Api.World.SpawnParticles(_beam);
     }
