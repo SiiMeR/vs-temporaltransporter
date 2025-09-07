@@ -30,6 +30,8 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         _inventory = inventory;
     }
 
+
+    // TODO: all state should be loaded from database. since the things work without having them loaded, their state needs to be tracked externally
     public BlockEntityTemporalTransporter()
     {
         _inventory = new InventoryGeneric(10, null, null, (id, self) =>
@@ -90,15 +92,14 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
             return;
         }
 
-        var isDisabled = tree.GetBool("isDisabled");
-        if (isDisabled)
+        if (Api.Side == EnumAppSide.Server)
         {
-            Disable();
+            // TODO Sync only on state change
+            IsDisabled = DatabaseAccessor.Covered.GetIsCovered(Pos.ToVec3i());
+            MarkDirty();
         }
-        else
-        {
-            Enable();
-        }
+
+        _dialog?.Redraw();
     }
 
     private void OnChargeAdded(string eventName, ref EnumHandling handling, IAttribute data)
@@ -310,7 +311,8 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
             if (BlockEntitySharedLogic.IsInterceptorCatchingBeam(senderPos, receiverPos, interceptorPos,
                     interceptorRadius) &&
                 HasFreeSlot(interceptorPos) &&
-                HasCharge(interceptorPos))
+                HasCharge(interceptorPos)
+                && IsNotCovered(interceptorPos))
             {
                 targetPosition = interceptor.CoordinateKey;
                 targetIsInterceptor = true;
@@ -366,6 +368,11 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
                 targetPositionVec3d.X, targetPositionVec3d.Y, targetPositionVec3d.Z);
     }
 
+    private bool IsNotCovered(Vec3i interceptorPos)
+    {
+        throw new NotImplementedException();
+    }
+
     private bool HasCharge(Vec3i interceptorPos)
     {
         return DatabaseAccessor.Charge.GetChargeCount(interceptorPos) > 0;
@@ -414,6 +421,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
                 DatabaseAccessor.Transporter.RemoveTransporterByPosition(Pos.ToVec3i());
                 DatabaseAccessor.InventoryItem.ClearInventoryForPosition(Pos.ToVec3i());
                 DatabaseAccessor.Charge.DeleteChargeTrackingForPosition(Pos.ToVec3i());
+                DatabaseAccessor.Covered.DeleteChargeTrackingForPosition(Pos.ToVec3i());
             }
             catch (Exception e)
             {
@@ -489,28 +497,6 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         tree["inventory"] = invtree;
         tree.SetBool("disabled", IsDisabled);
         tree.SetBool("connected", IsConnected);
-    }
-
-    public void Disable()
-    {
-        if (IsDisabled)
-        {
-            return;
-        }
-
-        IsDisabled = true;
-        _dialog?.Redraw();
-    }
-
-    public void Enable()
-    {
-        if (!IsDisabled)
-        {
-            return;
-        }
-
-        IsDisabled = false;
-        _dialog?.Redraw();
     }
 
     public void UpdateChargeCount(int chargeCount)

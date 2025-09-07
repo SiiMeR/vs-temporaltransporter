@@ -95,6 +95,7 @@ public class TemporalTransporterModSystem : ModSystem
         DatabaseAccessor.Interceptor = new InterceptorDatabase(api, Mod.Info.ModID);
         DatabaseAccessor.InventoryItem = new InventoryItemDatabase(api, Mod.Info.ModID);
         DatabaseAccessor.Charge = new ChargeDatabase(api, Mod.Info.ModID);
+        DatabaseAccessor.Covered = new CoveredDatabase(api, Mod.Info.ModID);
 
         ServerNetworkChannel = api.Network.GetChannel(Mod.Info.ModID);
     }

@@ -1,10 +1,10 @@
 {
   "block-temporaltransporter": "Temporal Transporter",
-  "blockdesc-temporaltransporter": "A piece of machinery long lost to time. Allows one to send and receive messages across time and space, for a cost.",
+  "blockdesc-temporaltransporter": "A finely tuned device capable of transmitting messages across space and time, to a similar receiver... at a cost.",
   "block-temporalinterceptor": "Temporal Interceptor",
-  "blockdesc-temporalinterceptor": "A piece of machinery that intercepts messages sent across time and space, for a cost. Extremely unstable, produces focused beams of energy upon interception.",
+  "blockdesc-temporalinterceptor": "A sophisticated piece of temporal machinery capable of intercepting messages. It is extremely unstable, and produces an overt beam of energy on occasion...",
   "item-transporterkey": "Temporal Key",
-  "itemdesc-transporterkey": "<font color=\"#99c9f9\"><i>One half of a forged pair. The key looks like it could be inserted into a piece of machinery long lost to time.</i></font>",
+  "itemdesc-transporterkey": "A key fitted for temporal machinery - it is one half of a pair. Perhaps it could be inserted into something...?",
   "error-temporaltransporter-destinationfull": "The destination temporal transporter is full!",
   "error-temporaltransporter-oncooldown": "You need to wait before sending another message!",
   "blockhelp-chargeable": "Add charge",

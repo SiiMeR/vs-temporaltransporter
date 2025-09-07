@@ -13,6 +13,7 @@ public static class DatabaseAccessor
     private static InterceptorDatabase? _interceptorDatabase;
     private static InventoryItemDatabase? _inventoryItemDatabase;
     private static ChargeDatabase? _chargeDatabase;
+    private static CoveredDatabase? _coveredDatabase;
 
     public static TransporterDatabase Transporter
     {
@@ -93,6 +94,26 @@ public static class DatabaseAccessor
             return _chargeDatabase;
         }
         set => _chargeDatabase = value;
+    }
+
+    public static CoveredDatabase Covered
+    {
+        get
+        {
+            if (TemporalTransporterModSystem.ServerApi == null)
+            {
+                throw new InvalidOperationException(
+                    "Tried to access Covered database from client side or before server initialization.");
+            }
+
+            if (_coveredDatabase == null)
+            {
+                throw new InvalidOperationException("Covered database has not been initialized.");
+            }
+
+            return _coveredDatabase;
+        }
+        set => _coveredDatabase = value;
     }
 
 

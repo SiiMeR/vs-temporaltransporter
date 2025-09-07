@@ -1,4 +1,5 @@
-﻿using Vintagestory.API.Common;
+﻿using TemporalTransporter.Database;
+using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
 
 namespace TemporalTransporter.Behaviors;
@@ -29,10 +30,15 @@ public class BlockEntityBehaviorUncoverable : BlockEntityBehavior
     {
         var rainmapHeight = Api.World.BlockAccessor.GetRainMapHeightAt(Pos);
 
-        var isDisabled = rainmapHeight > Pos.Y;
+        var isCovered = rainmapHeight > Pos.Y;
+
+        if (Api.Side == EnumAppSide.Server)
+        {
+            DatabaseAccessor.Covered.SetIsCovered(Pos.ToVec3i(), isCovered);
+        }
 
         var tree = new TreeAttribute();
-        tree.SetBool("isDisabled", isDisabled);
+        tree.SetBool("isDisabled", isCovered);
         tree.SetVec3i("position", Pos.ToVec3i());
 
         Api.Event.PushEvent(Events.SetDisabledState, tree);

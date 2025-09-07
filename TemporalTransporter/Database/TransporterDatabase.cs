@@ -25,7 +25,6 @@ public class TransporterDatabase
     private const string GetTransporterQuery =
         "SELECT * FROM Transporters WHERE CoordinateKey = @CoordinateKey;";
 
-
     private const string DeleteTransporterQuery =
         "DELETE FROM Transporters WHERE CoordinateKey = @CoordinateKey;";
 

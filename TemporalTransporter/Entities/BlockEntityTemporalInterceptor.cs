@@ -70,12 +70,21 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
         var isDisabled = tree.GetBool("isDisabled");
         if (isDisabled)
         {
-            Disable();
+            StopAnim();
         }
         else
         {
-            Enable();
+            StartAnim();
         }
+
+        if (Api.Side == EnumAppSide.Server)
+        {
+            // TODO Sync only on state change
+            IsDisabled = DatabaseAccessor.Covered.GetIsCovered(Pos.ToVec3i());
+            MarkDirty();
+        }
+
+        _dialog?.Redraw();
     }
 
     private void OnChargeAdded(string eventName, ref EnumHandling handling, IAttribute data)
@@ -142,6 +151,7 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
                 DatabaseAccessor.Interceptor.RemoveInterceptorByPosition(Pos.ToVec3i());
                 DatabaseAccessor.InventoryItem.ClearInventoryForPosition(Pos.ToVec3i());
                 DatabaseAccessor.Charge.DeleteChargeTrackingForPosition(Pos.ToVec3i());
+                DatabaseAccessor.Covered.DeleteChargeTrackingForPosition(Pos.ToVec3i());
             }
             catch (Exception e)
             {
@@ -193,7 +203,7 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
         tree["inventory"] = invtree;
     }
 
-    public void Disable()
+    public void StopAnim()
     {
         if (IsDisabled)
         {
@@ -201,20 +211,14 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
         }
 
         AnimUtil?.StopAnimation("active");
-
-        IsDisabled = true;
-        _dialog?.Redraw();
     }
 
-    public void Enable()
+    public void StartAnim()
     {
         if (!IsDisabled)
         {
             return;
         }
-
-
-        IsDisabled = false;
 
         if (Api.Side == EnumAppSide.Client)
         {
@@ -224,8 +228,6 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
                 Code = "active",
                 AnimationSpeed = 0.5f
             });
-
-            _dialog?.Redraw();
         }
     }
 
