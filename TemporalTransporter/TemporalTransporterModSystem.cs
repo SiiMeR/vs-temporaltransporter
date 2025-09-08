@@ -13,13 +13,25 @@ namespace TemporalTransporter;
 
 public class TemporalTransporterModSystem : ModSystem
 {
-    public static ICoreServerAPI? ServerApi;
-    public static ICoreClientAPI? ClientApi;
+    private static ICoreServerAPI? _serverApi;
 
     public static IServerNetworkChannel? ServerNetworkChannel;
     public static IClientNetworkChannel? ClientNetworkChannel;
 
     public static TemporalTransporterConfig? Config;
+    private static ICoreClientAPI? _clientApi;
+
+    public static ICoreClientAPI ClientApi
+    {
+        get => _clientApi ?? throw new NullReferenceException("ClientApi has not been initialized");
+        set => _clientApi = value;
+    }
+
+    public static ICoreServerAPI ServerApi
+    {
+        get => _serverApi ?? throw new NullReferenceException("ServerApi has not been initialized");
+        set => _serverApi = value;
+    }
 
     public override void Start(ICoreAPI api)
     {
@@ -31,41 +43,14 @@ public class TemporalTransporterModSystem : ModSystem
         api.RegisterBlockBehaviorClass("Chargeable", typeof(BlockBehaviorChargeable));
 
         api.Network.RegisterChannel(Mod.Info.ModID)
-            .RegisterMessageType<TransportersConnectedPacket>()
-            .RegisterMessageType<SyncChargesPacket>();
+            .RegisterMessageType<TransportersConnectedPacket>();
     }
 
     public override void StartClientSide(ICoreClientAPI api)
     {
         ClientApi = api;
         ClientNetworkChannel = api.Network.GetChannel(Mod.Info.ModID)
-            .SetMessageHandler<TransportersConnectedPacket>(OnTransportersConnected)
-            .SetMessageHandler<SyncChargesPacket>(OnSyncChargesPacketReceived);
-    }
-
-    private void OnSyncChargesPacketReceived(SyncChargesPacket packet)
-    {
-        if (ClientApi == null)
-        {
-            throw new InvalidOperationException("ClientApi is not initialized.");
-        }
-
-        var coords = DatabaseAccessor.CoordinateKeyToVec3i(packet.CoordinateKey);
-
-        var blockPos = new BlockPos(coords.X, coords.Y, coords.Z);
-        var blockEntity = ClientApi.World.BlockAccessor.GetBlockEntity(blockPos);
-
-
-        if (blockEntity is BlockEntityTemporalInterceptor blockEntityInterceptor)
-        {
-            blockEntityInterceptor.UpdateChargeCount(packet.ChargeCount);
-            blockEntityInterceptor.MarkDirty();
-        }
-        else if (blockEntity is BlockEntityTemporalTransporter blockEntityTransporter)
-        {
-            blockEntityTransporter.UpdateChargeCount(packet.ChargeCount);
-            blockEntityTransporter.MarkDirty();
-        }
+            .SetMessageHandler<TransportersConnectedPacket>(OnTransportersConnected);
     }
 
     private void OnTransportersConnected(TransportersConnectedPacket packet)

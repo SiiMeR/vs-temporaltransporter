@@ -115,11 +115,11 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
             return;
         }
 
-        ChargeCount += 1;
-
         if (Api.Side == EnumAppSide.Server)
         {
+            Console.WriteLine("charge added");
             ChargeCount = DatabaseAccessor.Charge.IncrementCharge(pos);
+            MarkDirty();
         }
 
         _dialog?.UpdateChargeCount();
@@ -312,7 +312,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
                     interceptorRadius) &&
                 HasFreeSlot(interceptorPos) &&
                 HasCharge(interceptorPos)
-                && IsNotCovered(interceptorPos))
+                && !IsCovered(interceptorPos))
             {
                 targetPosition = interceptor.CoordinateKey;
                 targetIsInterceptor = true;
@@ -343,13 +343,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         // TODO: These 3 should be tied together into an atomic operation (perhaps having db be the sot)
         var newChargeCount = DatabaseAccessor.Charge.DecrementCharge(Pos.ToVec3i());
         ChargeCount = newChargeCount;
-
-
-        TemporalTransporterModSystem.ServerNetworkChannel?.SendPacket(new SyncChargesPacket
-        {
-            ChargeCount = ChargeCount,
-            CoordinateKey = DatabaseAccessor.GetCoordinateKey(Pos.ToVec3i())
-        }, player);
+        MarkDirty();
 
         if (targetIsInterceptor)
         {
@@ -368,9 +362,9 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
                 targetPositionVec3d.X, targetPositionVec3d.Y, targetPositionVec3d.Z);
     }
 
-    private bool IsNotCovered(Vec3i interceptorPos)
+    private bool IsCovered(Vec3i interceptorPos)
     {
-        throw new NotImplementedException();
+        return DatabaseAccessor.Covered.GetIsCovered(interceptorPos);
     }
 
     private bool HasCharge(Vec3i interceptorPos)
@@ -391,7 +385,6 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         {
             var itemBytes = BlockEntitySharedLogic.ItemstackToBytes(itemStack);
             DatabaseAccessor.InventoryItem.UpdateInventoryItemSlot(toCoordinateKey, slotId, itemBytes);
-
 
             // TODO: this below is a side effect that should get trigerred via message
 
@@ -451,7 +444,8 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         if (api.Side == EnumAppSide.Server)
         {
             BlockEntitySharedLogic.UpdateInventory(api, Inventory, Pos.ToVec3i());
-            BlockEntitySharedLogic.SyncCharges(Pos.ToVec3i(), byPlayer);
+            ChargeCount = DatabaseAccessor.Charge.GetChargeCount(Pos.ToVec3i());
+            MarkDirty();
 
             return true;
         }
@@ -485,6 +479,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         Inventory.FromTreeAttributes(tree.GetTreeAttribute("inventory"));
         IsDisabled = tree.GetBool("disabled");
         IsConnected = tree.GetBool("connected");
+        ChargeCount = tree.GetInt("chargeCount");
 
         base.FromTreeAttributes(tree, worldForResolving);
     }
@@ -497,15 +492,6 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         tree["inventory"] = invtree;
         tree.SetBool("disabled", IsDisabled);
         tree.SetBool("connected", IsConnected);
-    }
-
-    public void UpdateChargeCount(int chargeCount)
-    {
-        ChargeCount = chargeCount;
-
-        if (Api.Side == EnumAppSide.Client)
-        {
-            _dialog?.UpdateChargeCount();
-        }
+        tree.SetInt("chargeCount", ChargeCount);
     }
 }

@@ -170,7 +170,9 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
         if (api.Side == EnumAppSide.Server)
         {
             BlockEntitySharedLogic.UpdateInventory(api, Inventory, Pos.ToVec3i());
-            BlockEntitySharedLogic.SyncCharges(Pos.ToVec3i(), byPlayer);
+            ChargeCount = DatabaseAccessor.Charge.GetChargeCount(Pos.ToVec3i());
+
+            MarkDirty();
             return true;
         }
 
@@ -192,6 +194,8 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldForResolving)
     {
         Inventory.FromTreeAttributes(tree.GetTreeAttribute("inventory"));
+        ChargeCount = tree.GetInt("chargeCount");
+
         base.FromTreeAttributes(tree, worldForResolving);
     }
 
@@ -201,6 +205,7 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
         ITreeAttribute invtree = new TreeAttribute();
         Inventory.ToTreeAttributes(invtree);
         tree["inventory"] = invtree;
+        tree.SetInt("chargeCount", ChargeCount);
     }
 
     public void StopAnim()

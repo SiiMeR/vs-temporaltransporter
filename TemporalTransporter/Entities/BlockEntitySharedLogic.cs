@@ -2,10 +2,8 @@
 using System.IO;
 using System.Numerics;
 using TemporalTransporter.Database;
-using TemporalTransporter.Messages;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
-using Vintagestory.API.Server;
 
 namespace TemporalTransporter.Entities;
 
@@ -79,20 +77,5 @@ public static class BlockEntitySharedLogic
         var distance = Vector2.Distance(interceptor, closestPoint);
 
         return distance <= radius;
-    }
-
-    public static void SyncCharges(Vec3i coords, IPlayer forPlayer)
-    {
-        var serverNetworkChannel = TemporalTransporterModSystem.ServerNetworkChannel;
-        if (serverNetworkChannel == null)
-        {
-            throw new InvalidOperationException(
-                "ServerNetworkChannel is not initialized. This method can only be called on the server side.");
-        }
-
-        var charges = DatabaseAccessor.Charge.GetChargeCount(coords);
-        serverNetworkChannel.SendPacket(
-            new SyncChargesPacket { CoordinateKey = DatabaseAccessor.GetCoordinateKey(coords), ChargeCount = charges },
-            forPlayer as IServerPlayer);
     }
 }
