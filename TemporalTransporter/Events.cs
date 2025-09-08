@@ -3,5 +3,5 @@
 public static class Events
 {
     public const string Charged = "tt:charged";
-    public const string SetDisabledState = "tt:disabled";
+    public const string SetCoveredState = "tt:covered";
 }

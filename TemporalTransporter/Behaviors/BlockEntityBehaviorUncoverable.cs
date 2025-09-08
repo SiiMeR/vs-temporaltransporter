@@ -41,6 +41,6 @@ public class BlockEntityBehaviorUncoverable : BlockEntityBehavior
         tree.SetBool("isDisabled", isCovered);
         tree.SetVec3i("position", Pos.ToVec3i());
 
-        Api.Event.PushEvent(Events.SetDisabledState, tree);
+        Api.Event.PushEvent(Events.SetCoveredState, tree);
     }
 }

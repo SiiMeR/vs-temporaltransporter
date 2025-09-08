@@ -11,7 +11,6 @@ namespace TemporalTransporter.GUI;
 public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
 {
     private readonly BlockEntityTemporalTransporter _blockEntity;
-    private bool _isConnected;
 
     public GuiDialogTemporalTransporter(InventoryBase inventory, BlockPos bePos, ICoreClientAPI capi,
         BlockEntityTemporalTransporter blockEntity) :
@@ -88,16 +87,16 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
                 CairoFont.WhiteSmallText().WithFontSize(14), keyslotTextBounds, "keyslotText")
             .AddDynamicText(keyCode,
                 CairoFont.WhiteSmallText().WithFontSize(11), keycodeTextBounds, "keycodeText")
-            .AddIf(_isConnected)
+            .AddIf(_blockEntity.IsConnected)
             .AddPassiveItemSlot(keySlotBounds, Inventory, _blockEntity.KeySlot)
             .EndIf()
-            .AddIf(!_isConnected)
+            .AddIf(!_blockEntity.IsConnected)
             .AddItemSlotGrid(Inventory, SendInvPacket, 1, new[] { _blockEntity.KeySlotIndex }, keySlotBounds,
                 "keyslot")
             .EndIf()
             .AddButton("Send", OnSendClick, sendButtonBounds, CairoFont.SmallButtonText(), EnumButtonStyle.Normal,
                 "sendButton")
-            .AddIf(_blockEntity.IsDisabled)
+            .AddIf(_blockEntity.IsCovered)
             .AddStaticText("Disabled: Not visible from sky",
                 CairoFont.WhiteSmallText().WithFontSize(14).WithColor(new[] { 1d, 0d, 0d, 1d }),
                 ElementBounds.Fixed(2, 115, 200, 20))
@@ -139,7 +138,7 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
     public void UpdateSendButtonState()
     {
         SingleComposer.GetButton("sendButton").Enabled =
-            _blockEntity is { ChargeCount: > 0, KeySlot.Empty: false, InputSlot.Empty: false, IsDisabled: false };
+            _blockEntity is { ChargeCount: > 0, KeySlot.Empty: false, InputSlot.Empty: false, IsCovered: false };
     }
 
     private void OnItemSlotModified(int slotId)
@@ -216,14 +215,10 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
         base.OnGuiOpened();
     }
 
-    public void SetIsConnected(bool isConnected)
-    {
-        _isConnected = isConnected;
-        Redraw();
-    }
 
-    public void Redraw()
+    public void Update(bool isConnected, bool isCovered, int chargeCount)
     {
-        SetupDialog();
+        UpdateChargeCount();
+        UpdateSendButtonState();
     }
 }

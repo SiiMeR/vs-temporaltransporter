@@ -36,7 +36,7 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
     public override InventoryBase Inventory => _inventory;
     public override string InventoryClassName { get; } = "temporalinterceptorInv";
 
-    public bool IsDisabled { get; set; }
+    public bool IsCovered { get; set; }
 
     public override void Initialize(ICoreAPI api)
     {
@@ -50,10 +50,10 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
         }
 
         api.Event.RegisterEventBusListener(OnChargeAdded, filterByEventName: Events.Charged);
-        api.Event.RegisterEventBusListener(OnDisabledStateChanged, filterByEventName: Events.SetDisabledState);
+        api.Event.RegisterEventBusListener(OnCoveredStateChanged, filterByEventName: Events.SetCoveredState);
     }
 
-    private void OnDisabledStateChanged(string eventName, ref EnumHandling handling, IAttribute data)
+    private void OnCoveredStateChanged(string eventName, ref EnumHandling handling, IAttribute data)
     {
         if (data is not ITreeAttribute tree)
         {
@@ -67,8 +67,8 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
         }
 
 
-        var isDisabled = tree.GetBool("isDisabled");
-        if (isDisabled)
+        var isCovered = tree.GetBool("isCovered");
+        if (isCovered)
         {
             StopAnim();
         }
@@ -80,7 +80,7 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
         if (Api.Side == EnumAppSide.Server)
         {
             // TODO Sync only on state change
-            IsDisabled = DatabaseAccessor.Covered.GetIsCovered(Pos.ToVec3i());
+            IsCovered = DatabaseAccessor.Covered.GetIsCovered(Pos.ToVec3i());
             MarkDirty();
         }
 
@@ -210,7 +210,7 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
 
     public void StopAnim()
     {
-        if (IsDisabled)
+        if (IsCovered)
         {
             return;
         }
@@ -220,7 +220,7 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
 
     public void StartAnim()
     {
-        if (!IsDisabled)
+        if (!IsCovered)
         {
             return;
         }

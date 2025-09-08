@@ -46,7 +46,7 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
             _listenerId = api.Event.RegisterGameTickListener(OnGameTick, 50);
         }
 
-        api.Event.RegisterEventBusListener(OnDisabledStateChanged, filterByEventName: Events.SetDisabledState);
+        api.Event.RegisterEventBusListener(OnDisabledStateChanged, filterByEventName: Events.SetCoveredState);
 
 
         base.Initialize(api, properties);
@@ -84,7 +84,7 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
 
     public override void OnBlockUnloaded()
     {
-        if (TemporalTransporterModSystem.ClientApi is { Side: EnumAppSide.Client })
+        if (Api.Side == EnumAppSide.Client)
         {
             TemporalTransporterModSystem.ClientApi.Event.UnregisterGameTickListener(_listenerId);
         }

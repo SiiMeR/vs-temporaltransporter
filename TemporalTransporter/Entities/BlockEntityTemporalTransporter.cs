@@ -20,8 +20,8 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
     private readonly InventoryGeneric _inventory;
     private GuiDialogTemporalTransporter? _dialog;
     private WeatherSystemServer? _weatherSystem;
-    public bool IsConnected;
-    public bool IsDisabled;
+    public bool IsConnected; // TODO: figure out from database
+    public bool IsCovered;
 
     public bool IsOnCooldown;
 
@@ -76,10 +76,10 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
 
         api.Event.RegisterEventBusListener(OnChargeAdded, filterByEventName: Events.Charged);
-        api.Event.RegisterEventBusListener(OnDisabledStateChanged, filterByEventName: Events.SetDisabledState);
+        api.Event.RegisterEventBusListener(OnCoveredStateChanged, filterByEventName: Events.SetCoveredState);
     }
 
-    private void OnDisabledStateChanged(string eventName, ref EnumHandling handling, IAttribute data)
+    private void OnCoveredStateChanged(string eventName, ref EnumHandling handling, IAttribute data)
     {
         if (data is not ITreeAttribute tree)
         {
@@ -95,11 +95,9 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         if (Api.Side == EnumAppSide.Server)
         {
             // TODO Sync only on state change
-            IsDisabled = DatabaseAccessor.Covered.GetIsCovered(Pos.ToVec3i());
+            IsCovered = DatabaseAccessor.Covered.GetIsCovered(Pos.ToVec3i());
             MarkDirty();
         }
-
-        _dialog?.Redraw();
     }
 
     private void OnChargeAdded(string eventName, ref EnumHandling handling, IAttribute data)
@@ -117,7 +115,6 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
         if (Api.Side == EnumAppSide.Server)
         {
-            Console.WriteLine("charge added");
             ChargeCount = DatabaseAccessor.Charge.IncrementCharge(pos);
             MarkDirty();
         }
@@ -225,12 +222,11 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
     public void SetIsConnected(bool isConnected)
     {
         IsConnected = isConnected;
-        _dialog?.SetIsConnected(isConnected);
     }
 
     public void OnSendItem(IPlayer byPlayer)
     {
-        if (IsDisabled)
+        if (IsCovered)
         {
             return;
         }
@@ -312,7 +308,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
                     interceptorRadius) &&
                 HasFreeSlot(interceptorPos) &&
                 HasCharge(interceptorPos)
-                && !IsCovered(interceptorPos))
+                && !InterceptorIsCovered(interceptorPos))
             {
                 targetPosition = interceptor.CoordinateKey;
                 targetIsInterceptor = true;
@@ -326,6 +322,13 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         {
             player.SendIngameError("ttrans-full",
                 Util.LangStr("error-temporaltransporter-destinationfull"));
+            return;
+        }
+
+        if (InterceptorIsCovered(receiverPos))
+        {
+            player.SendIngameError("ttrans-covered",
+                Util.LangStr("error-temporaltransporter-covered"));
             return;
         }
 
@@ -362,7 +365,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
                 targetPositionVec3d.X, targetPositionVec3d.Y, targetPositionVec3d.Z);
     }
 
-    private bool IsCovered(Vec3i interceptorPos)
+    private bool InterceptorIsCovered(Vec3i interceptorPos)
     {
         return DatabaseAccessor.Covered.GetIsCovered(interceptorPos);
     }
@@ -469,19 +472,19 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
             return _dialog;
         });
 
-        _dialog?.SetIsConnected(IsConnected);
-
         return true;
     }
 
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldForResolving)
     {
         Inventory.FromTreeAttributes(tree.GetTreeAttribute("inventory"));
-        IsDisabled = tree.GetBool("disabled");
+        IsCovered = tree.GetBool("covered");
         IsConnected = tree.GetBool("connected");
         ChargeCount = tree.GetInt("chargeCount");
 
         base.FromTreeAttributes(tree, worldForResolving);
+
+        _dialog?.Update(IsConnected, IsCovered, ChargeCount);
     }
 
     public override void ToTreeAttributes(ITreeAttribute tree)
@@ -490,7 +493,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         ITreeAttribute invtree = new TreeAttribute();
         Inventory.ToTreeAttributes(invtree);
         tree["inventory"] = invtree;
-        tree.SetBool("disabled", IsDisabled);
+        tree.SetBool("covered", IsCovered);
         tree.SetBool("connected", IsConnected);
         tree.SetInt("chargeCount", ChargeCount);
     }

@@ -7,6 +7,7 @@
   "itemdesc-transporterkey": "A key fitted for temporal machinery - it is one half of a pair. Perhaps it could be inserted into something...?",
   "error-temporaltransporter-destinationfull": "The destination temporal transporter is full!",
   "error-temporaltransporter-oncooldown": "You need to wait before sending another message!",
+  "error-temporaltransporter-covered": "Bad connection. Perhaps there is something covering the receiver?",
   "blockhelp-chargeable": "Add charge",
   "temporaltransporter-input-text": "Input",
   "temporaltransporter-key-text": "Key",

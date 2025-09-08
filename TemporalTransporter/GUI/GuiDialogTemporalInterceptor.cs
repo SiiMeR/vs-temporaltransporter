@@ -56,7 +56,7 @@ public class GuiDialogTemporalInterceptor : GuiDialogBlockEntity
             .AddShadedDialogBG(bgBounds)
             .AddDialogTitleBar(DialogTitle, OnTitleBarClose)
             .BeginChildElements(bgBounds)
-            .AddIf(_blockEntity.IsDisabled)
+            .AddIf(_blockEntity.IsCovered)
             .AddStaticText("Disabled: Not visible from sky",
                 CairoFont.WhiteSmallText().WithFontSize(13).WithColor(new[] { 1d, 0d, 0d, 1d }),
                 ElementBounds.Fixed(2, 60, 180, 20))

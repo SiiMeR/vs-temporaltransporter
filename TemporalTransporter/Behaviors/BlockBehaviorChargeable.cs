@@ -1,7 +1,9 @@
-﻿using TemporalTransporter.Helpers;
+﻿using System;
+using TemporalTransporter.Helpers;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
+using Vintagestory.API.Server;
 using Vintagestory.GameContent;
 
 namespace TemporalTransporter.Behaviors;
@@ -34,16 +36,19 @@ public class BlockBehaviorChargeable : BlockBehavior
 
         byPlayer.InventoryManager.ActiveHotbarSlot.TakeOut(1);
 
-        var data = new TreeAttribute();
-        data.SetVec3i("position", blockSel.Position.ToVec3i());
-
-        world.Api.Event.PushEvent(Events.Charged, data);
 
         if (world.Api is ICoreClientAPI clientApi)
         {
             clientApi.ShowChatMessage(Util.LangStr("charged-success"));
             clientApi.Gui
                 .PlaySound(new AssetLocation("game:sounds/tutorialstepsuccess"), true);
+        }
+        else if (world.Api is ICoreServerAPI)
+        {
+            var data = new TreeAttribute();
+            data.SetVec3i("position", blockSel.Position.ToVec3i());
+
+            world.Api.Event.PushEvent(Events.Charged, data);
         }
 
         handling = EnumHandling.PreventSubsequent;
