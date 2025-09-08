@@ -62,6 +62,8 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
     public ItemSlot KeySlot => _inventory[KeySlotIndex];
 
 
+    public string? KeyCode => KeySlot.Itemstack?.Attributes.GetString("keycode");
+
     public override InventoryBase Inventory => _inventory;
     public override string InventoryClassName { get; } = "temporaltransporterInv";
     public int ChargeCount { get; set; }
@@ -77,6 +79,13 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
         api.Event.RegisterEventBusListener(OnChargeAdded, filterByEventName: Events.Charged);
         api.Event.RegisterEventBusListener(OnCoveredStateChanged, filterByEventName: Events.SetCoveredState);
+
+
+        if (api.Side == EnumAppSide.Server && KeyCode != null)
+        {
+            IsConnected = DatabaseAccessor.Transporter.GetTransportersByConnectionKey(KeyCode).Length > 1;
+            MarkDirty();
+        }
     }
 
     private void OnCoveredStateChanged(string eventName, ref EnumHandling handling, IAttribute data)
@@ -94,9 +103,13 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
         if (Api.Side == EnumAppSide.Server)
         {
-            // TODO Sync only on state change
+            var wasCovered = IsCovered;
+
             IsCovered = DatabaseAccessor.Covered.GetIsCovered(Pos.ToVec3i());
-            MarkDirty();
+            if (wasCovered != IsCovered)
+            {
+                MarkDirty();
+            }
         }
     }
 
@@ -187,6 +200,15 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         {
             TransporterIds = ids
         }, players as IServerPlayer[]);
+
+        foreach (var transporterId in ids)
+        {
+            var coords = DatabaseAccessor.CoordinateKeyToVec3i(transporterId);
+            var blockPos = new BlockPos(coords.X, coords.Y, coords.Z);
+            var blockEntity = Api.World.BlockAccessor.GetBlockEntity<BlockEntityTemporalTransporter>(blockPos);
+
+            blockEntity?.OnConnectedServerSide();
+        }
     }
 
 
@@ -219,9 +241,15 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         base.OnReceivedClientPacket(player, packetid, data);
     }
 
-    public void SetIsConnected(bool isConnected)
+    public void OnConnectedClientSide()
     {
-        IsConnected = isConnected;
+        _dialog?.TryClose();
+    }
+
+    public void OnConnectedServerSide()
+    {
+        IsConnected = true;
+        MarkDirty();
     }
 
     public void OnSendItem(IPlayer byPlayer)
@@ -450,6 +478,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
             ChargeCount = DatabaseAccessor.Charge.GetChargeCount(Pos.ToVec3i());
             MarkDirty();
 
+
             return true;
         }
 
@@ -479,12 +508,13 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
     {
         Inventory.FromTreeAttributes(tree.GetTreeAttribute("inventory"));
         IsCovered = tree.GetBool("covered");
+
         IsConnected = tree.GetBool("connected");
         ChargeCount = tree.GetInt("chargeCount");
 
         base.FromTreeAttributes(tree, worldForResolving);
 
-        _dialog?.Update(IsConnected, IsCovered, ChargeCount);
+        _dialog?.Update();
     }
 
     public override void ToTreeAttributes(ITreeAttribute tree)

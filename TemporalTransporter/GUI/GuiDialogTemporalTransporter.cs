@@ -116,11 +116,11 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
             .EndChildElements()
             .Compose();
 
+
         UpdateSendButtonState();
 
         return true;
     }
-
 
     public void UpdateChargeCount()
     {
@@ -139,6 +139,11 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
     {
         SingleComposer.GetButton("sendButton").Enabled =
             _blockEntity is { ChargeCount: > 0, KeySlot.Empty: false, InputSlot.Empty: false, IsCovered: false };
+    }
+
+    public void LockKeyslot()
+    {
+        SingleComposer.ReCompose();
     }
 
     private void OnItemSlotModified(int slotId)
@@ -216,7 +221,7 @@ public class GuiDialogTemporalTransporter : GuiDialogBlockEntity
     }
 
 
-    public void Update(bool isConnected, bool isCovered, int chargeCount)
+    public void Update()
     {
         UpdateChargeCount();
         UpdateSendButtonState();

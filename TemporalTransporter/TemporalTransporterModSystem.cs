@@ -66,7 +66,7 @@ public class TemporalTransporterModSystem : ModSystem
             var blockPos = new BlockPos(coords.X, coords.Y, coords.Z);
             var blockEntity = ClientApi.World.BlockAccessor.GetBlockEntity<BlockEntityTemporalTransporter>(blockPos);
 
-            blockEntity?.SetIsConnected(true);
+            blockEntity?.OnConnectedClientSide();
         }
     }
 
