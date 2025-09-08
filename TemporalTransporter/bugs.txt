@@ -2,5 +2,4 @@
 * config to change ground height
 * shouldnt be usable below Y = ?
 
-* the key looks like a temporal gear, should change that
 * the inventory should have a gear slot placeholder

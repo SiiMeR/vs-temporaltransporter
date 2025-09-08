@@ -29,7 +29,7 @@
   //    }
   //  ],
   "shape": {
-    "base": "game:item/gear-temporal"
+    "base": "temporalkey"
   },
   "attributes": {
     displaycaseable: true,
@@ -46,6 +46,27 @@
         z: -58
       },
       scale: 0.25
+    },
+    onshelfTransform: {
+      translation: {
+        x: 0,
+        y: -0.28,
+        z: 0.21
+      },
+      rotation: {
+        x: 1,
+        y: 0,
+        z: 0
+      },
+      scale: 0.45
+    },
+    onDisplayTransform: {
+      translation: {
+        x: -0.02,
+        y: -0.21,
+        z: -0.1
+      },
+      scale: 0.57
     }
   },
   tpHandTransform: {
@@ -67,16 +88,21 @@
     scale: 0.61
   },
   guiTransform: {
+    translation: {
+      x: 7,
+      y: 1,
+      z: 0
+    },
     rotation: {
-      x: 74,
-      y: 49,
-      z: 29
+      x: -41,
+      y: -22,
+      z: -12
     },
     origin: {
       x: 0.5,
       y: 0.0625,
       z: 0.5
     },
-    scale: 3.42
+    scale: 2.2
   }
 }
