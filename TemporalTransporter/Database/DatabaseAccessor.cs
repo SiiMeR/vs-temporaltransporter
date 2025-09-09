@@ -14,6 +14,7 @@ public static class DatabaseAccessor
     private static InventoryItemDatabase? _inventoryItemDatabase;
     private static ChargeDatabase? _chargeDatabase;
     private static CoveredDatabase? _coveredDatabase;
+    private static MessagesDatabase? _messagesDatabase;
 
     public static TransporterDatabase Transporter
     {
@@ -53,6 +54,26 @@ public static class DatabaseAccessor
             return _interceptorDatabase;
         }
         set => _interceptorDatabase = value;
+    }
+
+    public static MessagesDatabase Messages
+    {
+        get
+        {
+            if (TemporalTransporterModSystem.ServerApi == null)
+            {
+                throw new InvalidOperationException(
+                    "Tried to access Messages database from client side or before server initialization.");
+            }
+
+            if (_messagesDatabase == null)
+            {
+                throw new InvalidOperationException("Messages database has not been initialized.");
+            }
+
+            return _messagesDatabase;
+        }
+        set => _messagesDatabase = value;
     }
 
 

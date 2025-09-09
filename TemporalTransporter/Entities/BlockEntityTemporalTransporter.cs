@@ -363,7 +363,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
 
         var itemStack = InputSlot.TakeOut(1);
-        MoveItemToPosition(itemStack, targetPosition, suitableSlot);
+        MoveItemToPosition(itemStack, targetPosition, suitableSlot, player);
         _inventory.MarkSlotDirty(InputSlotIndex);
 
 
@@ -411,15 +411,26 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
     }
 
 
-    public void MoveItemToPosition(ItemStack itemStack, string toCoordinateKey, int slotId)
+    public void MoveItemToPosition(ItemStack itemStack, string toCoordinateKey, int slotId, IServerPlayer player)
     {
         try
         {
             var itemBytes = BlockEntitySharedLogic.ItemstackToBytes(itemStack);
             DatabaseAccessor.InventoryItem.UpdateInventoryItemSlot(toCoordinateKey, slotId, itemBytes);
+            var fromCoordinateKey = DatabaseAccessor.GetCoordinateKey(Pos.ToVec3i());
+            DatabaseAccessor.Messages.InsertMessage(new Message
+            {
+                FromCoordinateKey = fromCoordinateKey,
+                ToCoordinateKey = toCoordinateKey,
+                ItemBlob = itemBytes,
+                SendDate = $"{DateTime.UtcNow:yyyy-MM-ddTHH:mm:ssZ}",
+                ByPlayerUID = player.PlayerUID
+            });
+
+            Api.Logger.Audit(
+                $"Player {player.PlayerUID}({player.PlayerName}) sent item {itemStack?.Collectible.Code} ({itemStack?.GetName()}) from {fromCoordinateKey} to {toCoordinateKey}");
 
             // TODO: this below is a side effect that should get trigerred via message
-
             var entityAtTarget =
                 Api.World.BlockAccessor.GetBlockEntity(DatabaseAccessor.CoordinateKeyToVec3i(toCoordinateKey)
                     .ToBlockPos());

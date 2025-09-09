@@ -106,7 +106,8 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
 
         if (Api.Side == EnumAppSide.Server)
         {
-            ChargeCount = DatabaseAccessor.Charge.IncrementCharge(pos, TemporalTransporterModSystem.Config?.ChargesPerGear ?? 1);
+            ChargeCount =
+                DatabaseAccessor.Charge.IncrementCharge(pos, TemporalTransporterModSystem.Config?.ChargesPerGear ?? 1);
         }
 
         _dialog?.UpdateChargeCount();
@@ -197,9 +198,9 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
     {
         Inventory.FromTreeAttributes(tree.GetTreeAttribute("inventory"));
         ChargeCount = tree.GetInt("chargeCount");
-        
+
         base.FromTreeAttributes(tree, worldForResolving);
-        
+
         _dialog?.Update();
     }
 
