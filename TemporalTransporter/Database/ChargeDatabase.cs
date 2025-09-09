@@ -23,7 +23,7 @@ public class ChargeDatabase
         "VALUES(@CoordinateKey, 0)";
 
     private const string IncrementChargeQuery =
-        "UPDATE Charges SET ChargeCount = ChargeCount + 1 WHERE CoordinateKey = @CoordinateKey RETURNING ChargeCount;";
+        "UPDATE Charges SET ChargeCount = ChargeCount + @Charges WHERE CoordinateKey = @CoordinateKey RETURNING ChargeCount;";
 
     private const string DecrementChargeQuery =
         "UPDATE Charges SET ChargeCount = ChargeCount - 1 WHERE CoordinateKey = @CoordinateKey RETURNING ChargeCount;";
@@ -62,13 +62,14 @@ public class ChargeDatabase
         return connection;
     }
 
-    public int IncrementCharge(Vec3i coords)
+    public int IncrementCharge(Vec3i coords, int charges)
     {
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
         using var command = new SqliteCommand(IncrementChargeQuery, connection);
 
+        command.Parameters.AddWithValue("@Charges", charges);
         command.Parameters.AddWithValue("@CoordinateKey", DatabaseAccessor.GetCoordinateKey(coords));
 
         return Convert.ToInt32(command.ExecuteScalar());

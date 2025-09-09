@@ -1,5 +1,4 @@
 * interceptor should have a marker that says it is on a line
 * config to change ground height
 * shouldnt be usable below Y = ?
-
 * the inventory should have a gear slot placeholder

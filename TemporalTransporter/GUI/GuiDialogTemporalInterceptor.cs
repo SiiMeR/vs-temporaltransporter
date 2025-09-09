@@ -75,7 +75,6 @@ public class GuiDialogTemporalInterceptor : GuiDialogBlockEntity
             .EndChildElements()
             .Compose();
 
-
         return true;
     }
 
@@ -102,16 +101,15 @@ public class GuiDialogTemporalInterceptor : GuiDialogBlockEntity
         TryClose();
     }
 
+    public void Update()
+    {
+        UpdateChargeCount();
+    }
 
     public override void OnGuiOpened()
     {
         SetupDialog();
 
         base.OnGuiOpened();
-    }
-
-    public void Redraw()
-    {
-        SetupDialog();
     }
 }

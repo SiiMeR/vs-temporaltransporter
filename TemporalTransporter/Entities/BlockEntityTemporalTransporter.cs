@@ -128,7 +128,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
         if (Api.Side == EnumAppSide.Server)
         {
-            ChargeCount = DatabaseAccessor.Charge.IncrementCharge(pos);
+            ChargeCount = DatabaseAccessor.Charge.IncrementCharge(pos, TemporalTransporterModSystem.Config?.ChargesPerGear ?? 1);
             MarkDirty();
         }
 
@@ -384,13 +384,13 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
         Api.World
             .PlaySoundAt(new AssetLocation("game:sounds/effect/translocate-breakdimension"),
-                Pos.X, Pos.Y, Pos.Z);
+                Pos.X, Pos.Y, Pos.Z, null, true, 64f);
 
         var targetPositionVec3d = DatabaseAccessor.CoordinateKeyToVec3d(targetPosition);
 
         Api.World
             .PlaySoundAt(new AssetLocation("game:sounds/effect/translocate-breakdimension"),
-                targetPositionVec3d.X, targetPositionVec3d.Y, targetPositionVec3d.Z);
+                targetPositionVec3d.X, targetPositionVec3d.Y, targetPositionVec3d.Z, null, true, 64f);
     }
 
     private bool InterceptorIsCovered(Vec3i interceptorPos)
@@ -454,18 +454,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
             }
         }
 
-        KeySlot.TakeOut(1);
-        Inventory.MarkSlotDirty(KeySlotIndex);
-
         base.OnBlockRemoved();
-    }
-
-    public override void OnBlockBroken(IPlayer byPlayer = null)
-    {
-        KeySlot.TakeOut(1);
-        Inventory.MarkSlotDirty(KeySlotIndex);
-
-        base.OnBlockBroken(byPlayer);
     }
 
     public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)

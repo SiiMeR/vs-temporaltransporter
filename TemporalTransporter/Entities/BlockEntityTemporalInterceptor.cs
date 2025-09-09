@@ -79,12 +79,14 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
 
         if (Api.Side == EnumAppSide.Server)
         {
-            // TODO Sync only on state change
-            IsCovered = DatabaseAccessor.Covered.GetIsCovered(Pos.ToVec3i());
-            MarkDirty();
-        }
+            var wasCovered = IsCovered;
 
-        _dialog?.Redraw();
+            IsCovered = DatabaseAccessor.Covered.GetIsCovered(Pos.ToVec3i());
+            if (wasCovered != IsCovered)
+            {
+                MarkDirty();
+            }
+        }
     }
 
     private void OnChargeAdded(string eventName, ref EnumHandling handling, IAttribute data)
@@ -104,7 +106,7 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
 
         if (Api.Side == EnumAppSide.Server)
         {
-            ChargeCount = DatabaseAccessor.Charge.IncrementCharge(pos);
+            ChargeCount = DatabaseAccessor.Charge.IncrementCharge(pos, TemporalTransporterModSystem.Config?.ChargesPerGear ?? 1);
         }
 
         _dialog?.UpdateChargeCount();
@@ -195,8 +197,10 @@ public class BlockEntityTemporalInterceptor : BlockEntityOpenableContainer
     {
         Inventory.FromTreeAttributes(tree.GetTreeAttribute("inventory"));
         ChargeCount = tree.GetInt("chargeCount");
-
+        
         base.FromTreeAttributes(tree, worldForResolving);
+        
+        _dialog?.Update();
     }
 
     public override void ToTreeAttributes(ITreeAttribute tree)

@@ -27,13 +27,12 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
         var colorRgba = properties["beamColorRGBA"].AsString().Split(",").Select(c => Convert.ToInt32(c)).ToArray();
         _colorRgba = ColorUtil.ColorFromRgba(colorRgba[0], colorRgba[1], colorRgba[2], colorRgba[3]);
 
-        _beam = new SimpleParticleProperties(1f, 1f, ColorUtil.ToRgba(50, 220, 220, 220), new Vec3d(),
-            new Vec3d(), new Vec3f(-0.1f, -0.1f, -0.1f), new Vec3f(0.1f, 1.5f, 0.1f), 2.5f, 0.0f)
+        _beam = new SimpleParticleProperties(0.4f, 0.8f, ColorUtil.ToRgba(50, 220, 220, 220), new Vec3d(),
+            new Vec3d(), new Vec3f(-0.1f, -0.1f, -0.1f), new Vec3f(0.1f, 1.5f, 0.1f), 1.5f, 0.0f)
         {
             MinSize = 0.2f,
             MinPos = new Vec3d(Pos.X + 0.5, Pos.Y + 1, Pos.Z + 0.5),
             SizeEvolve = EvolvingNatFloat.create(EnumTransformFunction.QUADRATIC, -0.6f),
-            MinQuantity = 0.5f,
             VertexFlags = 255,
             SelfPropelled = true,
             ParticleModel = EnumParticleModel.Quad,
@@ -80,7 +79,6 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
 
         base.OnBlockRemoved();
     }
-
 
     public override void OnBlockUnloaded()
     {
