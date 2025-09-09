@@ -20,7 +20,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
     private readonly InventoryGeneric _inventory;
     private GuiDialogTemporalTransporter? _dialog;
     private WeatherSystemServer? _weatherSystem;
-    public bool IsConnected; // TODO: figure out from database
+    public bool IsConnected;
     public bool IsCovered;
 
     public bool IsOnCooldown;
