@@ -128,7 +128,8 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
 
         if (Api.Side == EnumAppSide.Server)
         {
-            ChargeCount = DatabaseAccessor.Charge.IncrementCharge(pos, TemporalTransporterModSystem.Config?.ChargesPerGear ?? 1);
+            ChargeCount =
+                DatabaseAccessor.Charge.IncrementCharge(pos, TemporalTransporterModSystem.Config?.ChargesPerGear ?? 1);
             MarkDirty();
         }
 
@@ -336,7 +337,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
                     interceptorRadius) &&
                 HasFreeSlot(interceptorPos) &&
                 HasCharge(interceptorPos)
-                && !InterceptorIsCovered(interceptorPos))
+                && !TargetIsCovered(interceptorPos))
             {
                 targetPosition = interceptor.CoordinateKey;
                 targetIsInterceptor = true;
@@ -353,7 +354,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
             return;
         }
 
-        if (InterceptorIsCovered(receiverPos))
+        if (TargetIsCovered(receiverPos))
         {
             player.SendIngameError("ttrans-covered",
                 Util.LangStr("error-temporaltransporter-covered"));
@@ -393,9 +394,9 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
                 targetPositionVec3d.X, targetPositionVec3d.Y, targetPositionVec3d.Z, null, true, 64f);
     }
 
-    private bool InterceptorIsCovered(Vec3i interceptorPos)
+    private bool TargetIsCovered(Vec3i pos)
     {
-        return DatabaseAccessor.Covered.GetIsCovered(interceptorPos);
+        return DatabaseAccessor.Covered.GetIsCovered(pos);
     }
 
     private bool HasCharge(Vec3i interceptorPos)
@@ -427,6 +428,11 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
             {
                 BlockEntitySharedLogic.UpdateInventory(Api, temporalTransporter.Inventory,
                     temporalTransporter.Pos.ToVec3i());
+            }
+            else if (entityAtTarget is BlockEntityTemporalInterceptor temporalInterceptor)
+            {
+                BlockEntitySharedLogic.UpdateInventory(Api, temporalInterceptor.Inventory,
+                    temporalInterceptor.Pos.ToVec3i());
             }
         }
         catch (Exception e)
