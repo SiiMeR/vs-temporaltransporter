@@ -30,7 +30,7 @@ public class BlockEntityBehaviorUncoverable : BlockEntityBehavior
     {
         var rainmapHeight = Api.World.BlockAccessor.GetRainMapHeightAt(Pos);
 
-        var isCovered = rainmapHeight > Pos.Y;
+        var isCovered = Pos.Y < rainmapHeight || Pos.Y < TemporalTransporterModSystem.Config?.OnlyUsableAboveYLevel;
 
         if (Api.Side == EnumAppSide.Server)
         {
