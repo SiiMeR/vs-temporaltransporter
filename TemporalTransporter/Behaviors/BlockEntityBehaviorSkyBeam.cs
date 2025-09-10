@@ -40,7 +40,7 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
         };
 
 
-        if (Api.Side == EnumAppSide.Client)
+        if (api.Side == EnumAppSide.Client)
         {
             _listenerId = api.Event.RegisterGameTickListener(OnGameTick, 50);
         }
@@ -70,7 +70,7 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
 
     public override void OnBlockRemoved()
     {
-        if (Api.Side == EnumAppSide.Client)
+        if (Api?.Side == EnumAppSide.Client)
         {
             TemporalTransporterModSystem.ClientApi.Event.EnqueueMainThreadTask(
                 () => { TemporalTransporterModSystem.ClientApi.Event.UnregisterGameTickListener(_listenerId); },
@@ -82,7 +82,7 @@ public class BlockEntityBehaviorSkyBeam : BlockEntityBehavior
 
     public override void OnBlockUnloaded()
     {
-        if (Api.Side == EnumAppSide.Client)
+        if (Api?.Side == EnumAppSide.Client)
         {
             TemporalTransporterModSystem.ClientApi.Event.UnregisterGameTickListener(_listenerId);
         }
