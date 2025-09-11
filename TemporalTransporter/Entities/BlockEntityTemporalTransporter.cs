@@ -381,6 +381,14 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
         {
             _weatherSystem?.SpawnLightningFlash(DatabaseAccessor.CoordinateKeyToVec3d(targetPosition));
             DatabaseAccessor.Charge.DecrementCharge(DatabaseAccessor.CoordinateKeyToVec3i(targetPosition));
+            var blockEntityTemporalInterceptor = Api.World.BlockAccessor
+                .GetBlockEntity<BlockEntityTemporalInterceptor>(DatabaseAccessor.CoordinateKeyToVec3i(targetPosition)
+                    .AsBlockPos);
+            if (blockEntityTemporalInterceptor != null)
+            {
+                blockEntityTemporalInterceptor.ChargeCount -= 1;
+                blockEntityTemporalInterceptor.MarkDirty();
+            }
         }
 
         Api.World
