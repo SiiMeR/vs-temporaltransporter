@@ -72,6 +72,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
     {
         _inventory.LateInitialize($"{InventoryClassName}-{Pos}", api);
         _inventory.SlotModified += OnItemSlotModified;
+        _inventory.OnGetAutoPullFromSlot = OnGetAutoPullFromSlot;
         base.Initialize(api);
 
         _weatherSystem = Api.ModLoader.GetModSystem<WeatherSystemServer>();
@@ -86,6 +87,16 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
             IsConnected = DatabaseAccessor.Transporter.GetTransportersByConnectionKey(KeyCode).Length > 1;
             MarkDirty();
         }
+    }
+
+    private ItemSlot? OnGetAutoPullFromSlot(BlockFacing atBlockFace)
+    {
+        if (atBlockFace != BlockFacing.UP)
+        {
+            return Inventory.FirstOrDefault(slot => slot != KeySlot && slot != InputSlot && !slot.Empty);
+        }
+
+        return null;
     }
 
     private void OnCoveredStateChanged(string eventName, ref EnumHandling handling, IAttribute data)
@@ -461,8 +472,7 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
             Api.World.Logger.Error($"Failed to move item {itemStack} from {Pos} to {toCoordinateKey}: {e.Message}");
         }
     }
-
-
+    
     public override void OnBlockRemoved()
     {
         if (Api.Side == EnumAppSide.Server)
