@@ -18,8 +18,14 @@ public class TemporalTransporterModSystem : ModSystem
     public static IServerNetworkChannel? ServerNetworkChannel;
     public static IClientNetworkChannel? ClientNetworkChannel;
 
-    public static TemporalTransporterConfig? Config;
     private static ICoreClientAPI? _clientApi;
+    private static TemporalTransporterConfig? _config;
+
+    public static TemporalTransporterConfig Config
+    {
+        get => _config ?? new TemporalTransporterConfig();
+        set => _config = value;
+    }
 
     public static ICoreClientAPI ClientApi
     {

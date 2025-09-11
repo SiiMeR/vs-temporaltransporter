@@ -7,4 +7,6 @@ public class TemporalTransporterConfig
     public int OnlyUsableAboveYLevel { get; set; } = 50;
 
     public int ChargesPerGear { get; set; } = 1;
+
+    public int TransmissionSoundRange { get; set; } = 128;
 }

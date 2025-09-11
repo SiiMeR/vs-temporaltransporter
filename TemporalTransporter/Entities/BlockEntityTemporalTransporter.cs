@@ -391,15 +391,17 @@ public class BlockEntityTemporalTransporter : BlockEntityOpenableContainer
             }
         }
 
+        var soundRange = TemporalTransporterModSystem.Config.TransmissionSoundRange;
+
         Api.World
             .PlaySoundAt(new AssetLocation("game:sounds/effect/translocate-breakdimension"),
-                Pos.X, Pos.Y, Pos.Z, null, true, 64f);
+                Pos.X, Pos.Y, Pos.Z, null, true, soundRange);
 
         var targetPositionVec3d = DatabaseAccessor.CoordinateKeyToVec3d(targetPosition);
 
         Api.World
             .PlaySoundAt(new AssetLocation("game:sounds/effect/translocate-breakdimension"),
-                targetPositionVec3d.X, targetPositionVec3d.Y, targetPositionVec3d.Z, null, true, 64f);
+                targetPositionVec3d.X, targetPositionVec3d.Y, targetPositionVec3d.Z, null, true, soundRange);
     }
 
     private bool TargetIsCovered(Vec3i pos)
